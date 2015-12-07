@@ -1,0 +1,51 @@
+/*------------------
+*
+*   LAYOUT
+*
+*-------------------*/
+body{
+  min-width: 480px;
+}
+/*------------------
+*
+*   HEADER
+*
+*-------------------*/
+
+/*----------------
+*
+*     HELPERS
+*
+*----------------*/
+
+.margin-top{
+  margin-top: 1.2rem !important;
+}
+
+.margin-lg-top{
+  margin-top: 2.4rem !important;
+}
+
+.margin-bottom{
+  margin-top: 1.2rem !important;
+}
+
+.margin-lg-bottom{
+  margin-top: 2.4rem !important;
+}
+
+.margin-left{
+  margin-left: 1.2rem !important;
+}
+
+.margin-lg-left{
+  margin-left: 2.4rem !important;
+}
+
+.margin-right{
+  margin-right: 1.2rem !important;
+}
+
+.margin-lg-right{
+  margin-right: 2.4rem !important;
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html ng-app="digitalclassApp">
+  <head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Digital Class</title>
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bower_components/angular-bootstrap/ui-bootstrap-csp.css" rel="stylesheet">
+    <link href="bower_components/metro-bootstrap/dist/css/metro-bootstrap.min.css" rel="stylesheet">
+    <link href="bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="app/styles/color.css" rel="stylesheet">
+    <link href="app/styles/style.css" rel="stylesheet">
+    <script type="text/javascript" src="common.js"></script>
+  </head>
+  <body data-width="0" data-height="0" data-name="video_encode" data-tools="pnacl newlib glibc clang-newlib linux" data-configs="Debug Release" data-path="{tc}/{config}">
+    <header>
+      <navbar-top></navbar-top>
+    </header>
+    <div class="container" ui-view="main"></div>
+    <!-- <h1>Video Encode</h1>
+    <h2>Status: <code id="statusField">NO-STATUS</code></h2>
+    <p>The VideoEncode example demonstrates how to encode video.</p>
+    <br>
+    <select id="profileList"></select>
+    <input type="button" id="start" value="Start Recording" />
+    <input type="button" id="stop" value="Stop Recording" disabled="true"/>
+    <div id="download-box"></div>
+    <div id="length"></div>
+    <br>
+    <audio id="audio" autoplay></audio>
+    <pre id="log" style="font-weight: bold"></pre> -->
+    <div id="listener"></div>
+
+    <script src="bower_components/angular/angular.min.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+
+    <script src="app/scripts/app.js"></script>
+
+    <script src="app/scripts/controllers/home.js"></script>
+    <script src="app/scripts/controllers/desktop.js"></script>
+    <script src="app/scripts/controllers/webcam.js"></script>
+    <script src="app/scripts/controllers/initializer.js"></script>
+
+    <script src="app/scripts/directives/navbar-top.js"></script>
+
+    <script src="app/scripts/services/encoder.js"></script>
+    <script src="app/scripts/services/get-user-media.js"></script>    
+    <!-- The NaCl plugin will be embedded inside the element with id "listener".
+        See common.js.-->
+  </body>
+</html>
