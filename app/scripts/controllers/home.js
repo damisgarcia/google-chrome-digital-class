@@ -8,6 +8,6 @@
  * Controller of the digitalclassApp
  */
 angular.module('digitalclassApp')
-  .controller('HomeCtrl', function ($state) {
-    self = this
+  .controller('HomeCtrl', function ($state,$cookieStore) {
+    var background = chrome.runtime.connect({name:"home background"})
   });

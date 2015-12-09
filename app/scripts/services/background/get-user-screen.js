@@ -8,7 +8,6 @@
  * Factory in the digitalclassApp.background
  */
 
-
  var getUserScreen = (function(){
    var self = {}
 
@@ -29,8 +28,8 @@
    }
 
    self.fail = function(error){
-     // DigitalClass.situation = DigitalClass.status.fail
      console.debug(error)
+     DigitalClass.situation = DigitalClass.status.done
    }
 
    return self

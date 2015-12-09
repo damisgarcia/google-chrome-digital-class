@@ -2,7 +2,7 @@
   "program": {
     "portable": {
       "pnacl-translate": {
-        "url": "VideoEncoder.pexe"
+        "url": "video_encoder.pexe"
       }    
     }
   }

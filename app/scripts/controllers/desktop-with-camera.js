@@ -2,19 +2,16 @@
 
 /**
  * @ngdoc function
- * @name digitalclassApp.controller:WebcamCtrl
+ * @name digitalclassApp.controller:DesktopWithCameraCtrl
  * @description
- * # WebcamCtrl
+ * # DesktopWithCameraCtrl
  * Controller of the digitalclassApp
  */
 angular.module('digitalclassApp')
-  .controller('WebcamCtrl', function ($scope,$state,$cookieStore) {
+  .controller('DesktopWithCameraCtrl', function ($scope,$state,$cookieStore) {
     $cookieStore.put('state', $state.current.name)
 
-    var self = this
-    $scope.busy = BUSY
-
-    var background = chrome.runtime.connect({name:"background webcam"})
+    var background = chrome.runtime.connect({name:"background desktop with camera"})
 
     background.onMessage.addListener(function(res){
       // done
@@ -34,8 +31,8 @@ angular.module('digitalclassApp')
       }
       else if(res.action == "take stream records"){
         var preview = document.getElementById('preview')
-        if(res.$camera)
-          preview.src = res.$camera
+        if(res.$desktop)
+          preview.src = res.$desktop
       }
 
       $scope.$apply()
@@ -43,12 +40,12 @@ angular.module('digitalclassApp')
 
     this.start = function(){
       if(!BUSY){ // if false
-        background.postMessage({action:"webcam request stream"})
+        background.postMessage({action:"desktop with camera request stream"})
       }
     }
 
     this.stop = function(){
-      if(BUSY){ // if false
+      if(!BUSY){ // if false
         background.postMessage({action:"stop records"})
       }
     }

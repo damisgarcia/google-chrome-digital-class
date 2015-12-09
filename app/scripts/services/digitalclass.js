@@ -10,17 +10,40 @@
 var DigitalClass = (function(){
   var self = {}
 
+  self.filesystem = "filesystem:" + location.origin + "/persistent/"
+
   self.status = {
-    paused:     0,
+    done:       0,
     recording:  1,
-    processing: 2,
-    processed:  3,
-    canceled:   4,
-    success:    5,
-    failed:     6,
-    done:       7
-}
-  self.situation = self.status.paused
+    paused:     2,
+    success:    3,
+    fail:       4
+  }
+
+  self.situation = self.status.done
+
+  self.popup = null
+  self.popupOptions = {
+    type:"popup",
+    width: 320,
+    height: 240,
+    top: window.screen.availHeight,
+    left: window.screen.availWidth
+  }
+
+  self.camStream = null
+  self.desktopStream = null
+  self.micStream = null
+
+  self.$closeTab = function(id){
+    chrome.windows.remove(id, null)
+  }
+
+  self.$generateFileName = function(){
+    var basename = new Date().toLocaleString().replace(/ /g,'_')
+    basename = basename.replace(/[\/:]/g,'-')
+    return basename
+  }
 
   return self
 }(DigitalClass))

@@ -1,0 +1,8 @@
+<div class="row" ng-repeat="file in repositories.files">
+  <div class="container thumbnail">
+    <div class="col-xs-12">
+      <a ng-click="repositories.open($index)">{{file.$name}}</a>
+      <button class="btn btn-xs btn-danger pull-right" ng-click="repositories.destroy($index)">Destroy</button>
+    </div>
+  </div>
+</div>

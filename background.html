@@ -8,24 +8,15 @@
     <title>Digital Class</title>
     <script type="text/javascript" src="common.js"></script>
     <script type="text/javascript" src="app/scripts/services/digitalclass.js"></script>
-    <script type="text/javascript" src="app/scripts/services/get-user-screen-background.js"></script>
-    <script type="text/javascript" src="background.js"></script>
+    <script type="text/javascript" src="app/scripts/services/background/get-user-screen.js"></script>
+    <script type="text/javascript" src="app/scripts/services/background/get-user-media.js"></script>
+    <script type="text/javascript" src="app/scripts/services/background/encoder.js"></script>
+    <script type="text/javascript" src="app/scripts/services/background/file-system.js"></script>
+    <script type="text/javascript" src="app/scripts/services/background/stream-helper.js"></script>
+    <script type="text/javascript" src="app/scripts/services/background/background.js"></script>
   </head>
   <body data-width="1280" data-height="720" data-name="video_encode" data-tools="pnacl newlib glibc clang-newlib linux" data-configs="Debug Release" data-path="{tc}/{config}">
-    <!-- <h1>Video Encode</h1>
-    <h2>Status: <code id="statusField">NO-STATUS</code></h2>
-    <p>The VideoEncode example demonstrates how to encode video.</p>
-    <br>
-    <select id="profileList"></select>
-    <input type="button" id="start" value="Start Recording" />
-    <input type="button" id="stop" value="Stop Recording" disabled="true"/>
-    <div id="download-box"></div>
-    <div id="length"></div>
-    <br>
-    <audio id="audio" autoplay></audio>
-    <pre id="log" style="font-weight: bold"></pre> -->
     <div id="listener"></div>
-
     <!-- The NaCl plugin will be embedded inside the element with id "listener".
         See common.js.-->
   </body>

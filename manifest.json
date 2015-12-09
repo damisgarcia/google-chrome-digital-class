@@ -11,13 +11,13 @@
     "default_popup": "index.html"
   },
   "background": {
-    "page":"background.html"    
+    "page":"background.html"
   },
   "web_accessible_resources":[
     "index.html",
     "app/",
     "bower_components/"
-  ],
+  ],  
   "permissions": [
     "desktopCapture",
     "tabCapture",
