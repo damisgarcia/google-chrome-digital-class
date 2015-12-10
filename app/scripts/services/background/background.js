@@ -44,8 +44,10 @@ chrome.runtime.onConnect.addListener(function(port) {
     else if(res.action == "desktop request stream"){
       getUserScreen.getDesktop(function(stream){
         DigitalClass.desktopStream = stream
+        var filename = DigitalClass.$generateFileName()
+
         var options = {
-          filename: DigitalClass.$generateFileName() + ".webm",
+          filename: filename + ".webm",
           width: window.screen.width,
           height: window.screen.height
         }
@@ -53,6 +55,17 @@ chrome.runtime.onConnect.addListener(function(port) {
         function onstop(){
           chrome.tabs.create({url: DigitalClass.filesystem + options.filename})
         }
+
+        getUserMedia.getMicrophone(function(stream){
+          DigitalClass.micStream = stream
+
+          stream.onended = function(){
+            getUserMedia.stopRecordMicrophone(function(blob){
+              fileSystem.save(filename + ".wav",blob)
+            })
+          }
+          getUserMedia.startRecordMicrophone(stream)
+        })
 
         var blobURL = Encoder.start(stream,options,onstop)
         port.postMessage({action:"desktop request stream",stream: blobURL, status: DigitalClass.situation})
@@ -62,8 +75,9 @@ chrome.runtime.onConnect.addListener(function(port) {
     else if(res.action == "webcam request stream"){
       getUserMedia.getWebCam(function(stream){
         DigitalClass.camStream = stream
+        var filename = DigitalClass.$generateFileName()
         var options = {
-          filename: DigitalClass.$generateFileName() + ".webm",
+          filename: filename + ".webm",
           width: 640,
           height: 480
         }
@@ -71,6 +85,17 @@ chrome.runtime.onConnect.addListener(function(port) {
         function onstop(){
           chrome.tabs.create({url: DigitalClass.filesystem + options.filename})
         }
+
+        getUserMedia.getMicrophone(function(stream){
+          DigitalClass.micStream = stream
+
+          stream.onended = function(){
+            getUserMedia.stopRecordMicrophone(function(blob){
+              fileSystem.save(filename + ".wav",blob)
+            })
+          }
+          getUserMedia.startRecordMicrophone(stream)
+        })
 
         var blobURL = Encoder.start(stream,options,onstop)
         port.postMessage({ action:"webcam request stream",stream: blobURL, status: DigitalClass.situation })
@@ -94,6 +119,17 @@ chrome.runtime.onConnect.addListener(function(port) {
           function onstop(){
             chrome.tabs.create({url: DigitalClass.filesystem + options.filename})
           }
+
+          getUserMedia.getMicrophone(function(stream){
+            DigitalClass.micStream = stream
+
+            stream.onended = function(){
+              getUserMedia.stopRecordMicrophone(function(blob){
+                fileSystem.save(filename + ".wav",blob)
+              })
+            }
+            getUserMedia.startRecordMicrophone(stream)
+          })
 
           var blobURL = Encoder.start(stream,options,onstop)
           port.postMessage({ action:"webcam request stream",stream: blobURL, status: DigitalClass.situation })

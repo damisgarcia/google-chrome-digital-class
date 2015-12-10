@@ -28,8 +28,6 @@ var Encoder = (function(){
     self.element.track = videoTrack
     self.element.play()
 
-    console.log(self.element.src)
-
     self.element.track.onended = function(){
       self.stop(onStop)
     }
@@ -59,10 +57,19 @@ var Encoder = (function(){
 
   self.stopRecords = function(){
     if(DigitalClass.camStream != null && DigitalClass.camStream.active){
-      DigitalClass.camStream.getVideoTracks()[0].stop()
+      DigitalClass.camStream.getVideoTracks().forEach(function(track){
+        track.stop()
+      })
     }
     if(DigitalClass.desktopStream != null && DigitalClass.desktopStream.active){
-      DigitalClass.desktopStream.getVideoTracks()[0].stop()
+      DigitalClass.desktopStream.getVideoTracks().forEach(function(track){
+        track.stop()
+      })
+    }
+    if(DigitalClass.micStream != null && DigitalClass.micStream){
+      DigitalClass.micStream.getAudioTracks().forEach(function(track){
+        track.stop()
+      })
     }
   }
 

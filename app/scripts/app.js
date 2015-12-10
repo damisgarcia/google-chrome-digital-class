@@ -24,6 +24,16 @@ angular.module('digitalclassApp',['ngCookies','ui.bootstrap','ui.router']).confi
       }
     })
 
+    .state('configure', {
+      url: "/configure",
+      views:{
+        "main":{
+          templateUrl: "app/views/configure.html",
+          controller: "ConfigureCtrl as configure"
+        }
+      }
+    })
+
     .state('desktop', {
       url: "/desktop",
       views:{
@@ -67,8 +77,8 @@ angular.module('digitalclassApp',['ngCookies','ui.bootstrap','ui.router']).confi
 
 .run(function($rootScope,$cookieStore,$state){
   $rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
-    console.log(fromState.name)
-    if(!fromState.name && toState.name != "repositories"){
+    var blacklist = ["repositories","configure"]
+    if(!fromState.name && !blacklist.includes(toState.name)){
       if($cookieStore.get('state')){
         var currentState = $cookieStore.get('state')
         $state.go(currentState)
