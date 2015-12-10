@@ -16,8 +16,9 @@
   "web_accessible_resources":[
     "index.html",
     "app/",
-    "bower_components/"
-  ],  
+    "bower_components/",
+    "test/"
+  ],
   "permissions": [
     "desktopCapture",
     "tabCapture",
