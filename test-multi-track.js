@@ -4,6 +4,8 @@
 
 'use strict'
 
+window.big = true
+
 function record(filename,video){
   common.naclModule.postMessage({
     command: 'start',
@@ -17,19 +19,19 @@ function record(filename,video){
 
 
 function onSuccessMediaUser(stream){
-  var videoTrack = stream.getVideoTracks()[0]
+  window.MediaUserVideoTrack = stream.getVideoTracks()[0]
   var element = document.getElementById("mediaUser")
   element.src = URL.createObjectURL(stream)
-  element.track = videoTrack
+  element.track = window.MediaUserVideoTrack
   element.play()
   record("camera.webm",element)
 }
 
 function onSuccessMediaUserSmallVideo(stream){
-  var videoTrack = stream.getVideoTracks()[0]
+  window.MediaUserSmallVideoTrack = stream.getVideoTracks()[0]
   var element = document.getElementById("mediaUserSmall")
   element.src = URL.createObjectURL(stream)
-  element.track = videoTrack
+  element.track = window.MediaUserSmallVideoTrack
   element.play()
   record("camera-small.webm",element)
 }
@@ -38,7 +40,21 @@ function onFailMediaUser(error){
   console.debug(error)
 }
 
+window.$stop = function (e){
+  e.preventDefault()
+  common.naclModule.postMessage({command: "stop"})
+}
 
+ window.$switch = function(e){
+  e.preventDefault()
+  big ? big = false : big = true
+
+  if(big){
+    console.log(window.MediaUserSmallVideoTrack)
+  } else{
+    console.log(window.MediaUserVideoTrack)
+  }
+}
 
 function moduleDidLoad() {
   // The module is not hidden by default so we can easily see if the plugin
@@ -51,8 +67,6 @@ function moduleDidLoad() {
     video:true
   },onSuccessMediaUserSmallVideo,onFailMediaUser)
 
-  // Wait 5s to stop recorder
-  setTimeout(function(){
-    common.naclModule.postMessage({command: "stop"})
-  },5000)
+  document.getElementById('stop').onclick = $stop
+  document.getElementById('switch').onclick = $switch
 }

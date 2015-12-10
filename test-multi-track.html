@@ -30,9 +30,10 @@
   </head>
   <body data-width="1280" data-height="720" data-name="video_encode" data-tools="pnacl newlib glibc clang-newlib linux" data-configs="Debug Release" data-path="{tc}/{config}">
     <div class="row">
-      <video id="mediaUser" class="col active" width="640" height="480" autoplay="true" controls="true"></video>
+      <video id="mediaUser" class="col" width="640" height="480" autoplay="true" controls="true"></video>
       <video id="mediaUserSmall" class="col" width="320" height="240" autoplay="true" controls="true"></video>
     </div>
+    <button id="stop">Stop!</button> <button id="switch">Switch Target</button>
     <div id="listener"></div>
     <!-- The NaCl plugin will be embedded inside the element with id "listener".
         See common.js.-->
