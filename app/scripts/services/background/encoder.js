@@ -19,6 +19,7 @@ var Encoder = (function(){
 
     var videoTrack = stream.getVideoTracks()[0]
     var blobURL = URL.createObjectURL(stream)
+    var saveDisk = options.hasOwnProperty('saveDisk')
 
 
     self.element = document.createElement("video")
@@ -32,14 +33,16 @@ var Encoder = (function(){
       self.stop(onStop)
     }
 
-    common.naclModule.postMessage({
-      command: 'start',
-      file_name: options.filename,
-      video_track: self.element.track,
-      profile: 'vp8',
-      width: self.element.width,
-      height: self.element.height
-    });
+    if(saveDisk && options.saveDisk){
+      common.naclModule.postMessage({
+        command: 'start',
+        file_name: options.filename,
+        video_track: self.element.track,
+        profile: 'vp8',
+        width: self.element.width,
+        height: self.element.height
+      });
+    }
 
     return blobURL
   }
@@ -71,6 +74,29 @@ var Encoder = (function(){
         track.stop()
       })
     }
+  }
+
+  self.changeTrack = function(stream){
+    self.element.track = stream.getVideoTracks()[0]
+  }
+
+  self.updateTrack = function(){
+    common.naclModule.postMessage({
+      command: 'change_track',
+      video_track: self.element.track
+    });
+  }
+
+  self.saveFrame = function(filename){
+    var canvas = document.createElement("canvas")
+    canvas.width = self.element.width
+    canvas.height = self.element.height
+    var ctx = canvas.getContext("2d")
+    ctx.drawImage(self.element,0,0)
+    var base64 = canvas.toDataURL("image/png",0.1)
+    console.log(base64)
+    var blob = new Blob([base64],{type:"image/png"})
+    fileSystem.save(filename+".png",blob)
   }
 
   // self.reload = function(){

@@ -20,13 +20,15 @@ function record(filename,video){
 }
 
 
-function onSuccessMediaUser(stream){
+function onSuccessStream(stream){
   window.MediaUserVideoTrack = stream.getVideoTracks()[0]
   videoBg = document.getElementById("mediaUser")
   videoBg.src = URL.createObjectURL(stream)
+  videoBg.width = window.screen.width
+  videoBg.height = window.screen.height
   videoBg.track = window.MediaUserVideoTrack
   videoBg.play()
-  //record("camera.webm",videoBg)
+  record("screen-camera.webm",videoBg)  
 }
 
 function onSuccessMediaUserSmallVideo(stream){
@@ -35,7 +37,6 @@ function onSuccessMediaUserSmallVideo(stream){
   videoSm.src = URL.createObjectURL(stream)
   videoSm.track = window.MediaUserSmallVideoTrack
   videoSm.play()
-  record("camera-small.webm",videoSm)
 }
 
 function onFailMediaUser(error){
@@ -52,7 +53,7 @@ window.$stop = function (e){
   big ? big = false : big = true
   common.naclModule.postMessage({
     command: 'change_track',
-    video_track: videoBg.track
+    video_track: videoSm.track
   });
   if(big){
     console.log(window.MediaUserSmallVideoTrack)
@@ -64,9 +65,19 @@ window.$stop = function (e){
 function moduleDidLoad() {
   // The module is not hidden by default so we can easily see if the plugin
   // failed to load.
-  navigator.webkitGetUserMedia({
-    video:true
-  },onSuccessMediaUser,onFailMediaUser)
+  chrome.desktopCapture.chooseDesktopMedia(['window','screen'], function(desktop_id){
+    navigator.webkitGetUserMedia({
+      audio: false,
+      video: {
+        mandatory: {
+          chromeMediaSource: 'desktop',
+          chromeMediaSourceId: desktop_id,
+          maxWidth:  window.screen.availWidth,
+          maxHeight: window.screen.availHeight
+        }
+      }
+    },onSuccessStream,onFailMediaUser)
+  })
 
   navigator.webkitGetUserMedia({
     video:true

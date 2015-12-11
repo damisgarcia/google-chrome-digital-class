@@ -52,6 +52,7 @@
    //  private
    self.$find_by_name = function(repository,filename,callback){
      repository.root.getFile(filename, {create: false}, function(DatFile) {
+       self.$appendPublicAttributesToFile(DatFile)
        callback(DatFile)
      })
    }
@@ -70,11 +71,15 @@
     var entries = [];
     dirReader.readEntries (function(results) {
       results.forEach(function(file){
-        file.extensionPath = self.basename + file.fullPath
-        file.$name = file.name
+        self.$appendPublicAttributesToFile(file)
       })
       callback(results)
     })
+   }
+
+   self.$appendPublicAttributesToFile = function(file){
+     file.extensionPath = self.basename + file.fullPath
+     file.$name = file.name
    }
 
    self.$errorHandler = function(error){
@@ -83,3 +88,22 @@
 
    return self
  }(fileSystem))
+
+
+// API => Examples
+
+// fileSystem.save("hello_world.txt",new Blob(["Hello World"],{type:"text/plain"}))
+// fileSystem.list(function(repositories){
+//   console.log(repositories)
+// })
+// // Find
+// fileSystem.find_by_name("08-12-2015_17-29-20_desktop.webm",function(f){
+//   console.log(f)
+// })
+//
+// // Destroy
+// fileSystem.find_by_name("hello_world.txt",function(f){
+//   fileSystem.destroy(f,function(){
+//     console.log("File Destroy")
+//   })
+// })
