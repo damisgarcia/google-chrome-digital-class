@@ -1,0 +1,49 @@
+<div class="container margin-lg-top">
+  <h3 class="margin-bottom">
+    {{repository.filename}}
+    <button class="btn btn-danger btn-xs pull-right" ng-click="repository.destroy()">Destroy</button>
+  </h3>
+  <div class="row">
+    <videogular vg-theme="repository.video.theme" vg-auto-play="true">
+    	<vg-media vg-src="repository.video.sources"
+    			vg-tracks="repository.video.tracks">
+    	</vg-media>
+      <vg-controls>
+    		<vg-play-pause-button></vg-play-pause-button>
+    		<vg-time-display>{{ currentTime | date:'mm:ss' }}</vg-time-display>
+    		<vg-scrub-bar>
+    			<vg-scrub-bar-current-time></vg-scrub-bar-current-time>
+    		</vg-scrub-bar>
+    		<vg-time-display>{{ timeLeft | date:'mm:ss' }}</vg-time-display>
+    		<vg-volume>
+    			<vg-mute-button></vg-mute-button>
+    			<vg-volume-bar></vg-volume-bar>
+    		</vg-volume>
+    		<vg-fullscreen-button></vg-fullscreen-button>
+    	</vg-controls>
+    </videogular>
+  </div>
+</div>
+<br></br><br>
+<div class="container">
+  <div class="row">
+    <videogular vg-theme="repository.audio.theme" vg-auto-play="true" class="videogular-container audio">
+    	<vg-media vg-src="repository.audio.sources"	vg-tracks="repository.audio.tracks" vg-type="audio">
+    	</vg-media>
+      <vg-controls>
+    		<vg-play-pause-button></vg-play-pause-button>
+    		<vg-time-display>{{ currentTime | date:'mm:ss' }}</vg-time-display>
+    		<vg-scrub-bar>
+    			<vg-scrub-bar-current-time></vg-scrub-bar-current-time>
+    		</vg-scrub-bar>
+    		<vg-time-display>{{ timeLeft | date:'mm:ss' }}</vg-time-display>
+    		<vg-volume>
+    			<vg-mute-button></vg-mute-button>
+    			<vg-volume-bar></vg-volume-bar>
+    		</vg-volume>
+    		<vg-fullscreen-button></vg-fullscreen-button>
+    	</vg-controls>
+    </videogular>
+  </div>
+  <button class="btn btn-lg margin-lg-top" ui-sref="repositories">Back</button>
+</div>

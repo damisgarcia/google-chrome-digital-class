@@ -9,7 +9,18 @@ window.BUSY = false
 
 var background = chrome.runtime.connect({name:"background app"})
 
-angular.module('digitalclassApp',['ngCookies','ui.bootstrap','ui.router']).config(function($stateProvider, $urlRouterProvider) {
+angular.module('digitalclassApp',
+    [
+      'ngCookies',
+      'ngSanitize',
+      'com.2fdevs.videogular',
+      'com.2fdevs.videogular.plugins.controls',
+      'com.2fdevs.videogular.plugins.overlayplay',
+      'com.2fdevs.videogular.plugins.poster',
+      'ui.bootstrap',
+      'ui.router'
+    ]
+  ).config(function($stateProvider, $urlRouterProvider) {
   // If route is not exist
   $urlRouterProvider.otherwise("/home");
   // Routes
@@ -73,11 +84,24 @@ angular.module('digitalclassApp',['ngCookies','ui.bootstrap','ui.router']).confi
         }
       }
     })
+
+    .state('repositories.show', {
+      parent:'repositories',
+      url: "/:fileName",
+      views:{
+        "main@":{
+          templateUrl: "app/views/repositories-show.html",
+          controller: "RepositoriesShowCtrl as repository"
+        }
+      }
+    })
+
 })
 
 .run(function($rootScope,$cookieStore,$state){
+  var blacklist = ["repositories","configure","repositories.show"]
+
   $rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
-    var blacklist = ["repositories","configure"]
     if(!fromState.name && !blacklist.includes(toState.name)){
       if($cookieStore.get('state')){
         var currentState = $cookieStore.get('state')

@@ -17,11 +17,7 @@ angular.module('digitalclassApp')
         self.files = res.files
       }
       $scope.$apply()
-    })
-
-    self.open = function(index){
-      window.open(self.files[index].extensionPath)
-    }
+    })    
 
     self.destroy = function(index){
       if(confirm("Really delete this file"))
