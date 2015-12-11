@@ -5,6 +5,8 @@
 'use strict'
 
 window.big = true
+var videoBg;
+var videoSm;
 
 function record(filename,video){
   common.naclModule.postMessage({
@@ -20,20 +22,20 @@ function record(filename,video){
 
 function onSuccessMediaUser(stream){
   window.MediaUserVideoTrack = stream.getVideoTracks()[0]
-  var element = document.getElementById("mediaUser")
-  element.src = URL.createObjectURL(stream)
-  element.track = window.MediaUserVideoTrack
-  element.play()
-  record("camera.webm",element)
+  videoBg = document.getElementById("mediaUser")
+  videoBg.src = URL.createObjectURL(stream)
+  videoBg.track = window.MediaUserVideoTrack
+  videoBg.play()
+  //record("camera.webm",videoBg)
 }
 
 function onSuccessMediaUserSmallVideo(stream){
   window.MediaUserSmallVideoTrack = stream.getVideoTracks()[0]
-  var element = document.getElementById("mediaUserSmall")
-  element.src = URL.createObjectURL(stream)
-  element.track = window.MediaUserSmallVideoTrack
-  element.play()
-  record("camera-small.webm",element)
+  videoSm = document.getElementById("mediaUserSmall")
+  videoSm.src = URL.createObjectURL(stream)
+  videoSm.track = window.MediaUserSmallVideoTrack
+  videoSm.play()
+  record("camera-small.webm",videoSm)
 }
 
 function onFailMediaUser(error){
@@ -48,7 +50,10 @@ window.$stop = function (e){
  window.$switch = function(e){
   e.preventDefault()
   big ? big = false : big = true
-
+  common.naclModule.postMessage({
+    command: 'change_track',
+    video_track: videoBg.track
+  });
   if(big){
     console.log(window.MediaUserSmallVideoTrack)
   } else{
