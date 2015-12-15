@@ -19,8 +19,8 @@
            mandatory: {
              chromeMediaSource: 'desktop',
              chromeMediaSourceId: desktop_id,
-             maxWidth:  window.screen.availWidth,
-             maxHeight: window.screen.availHeight
+             maxWidth:  window.screen.width,
+             maxHeight: window.screen.height
            }
          }
        },callback,( onFail || self.fail ))

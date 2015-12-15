@@ -13,7 +13,7 @@ angular.module('digitalclassApp')
 
     var background = chrome.runtime.connect({name:"background desktop"})
 
-    background.onMessage.addListener(function(res){      
+    background.onMessage.addListener(function(res){
       // done
       if(res.status == 0){
         BUSY = false
@@ -33,8 +33,7 @@ angular.module('digitalclassApp')
         var preview = document.getElementById('preview')
         if(res.$desktop)
           preview.src = res.$desktop
-      }
-
+      }      
       $scope.$apply()
     })
 
@@ -45,8 +44,10 @@ angular.module('digitalclassApp')
     }
 
     this.stop = function(){
-      if(!BUSY){ // if false
-        background.postMessage({action:"stop records"})
+      if(BUSY){ // if false
+        setTimeout(function(){
+          background.postMessage({action:"stop records"})
+        },400)
       }
     }
 
