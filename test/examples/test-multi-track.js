@@ -72,9 +72,7 @@ window.$stop = function (e){
   }
 }
 
-function moduleDidLoad() {
-  // The module is not hidden by default so we can easily see if the plugin
-  // failed to load.
+window.$start = function(e){
   chrome.desktopCapture.chooseDesktopMedia(['window','screen'], function(desktop_id){
     navigator.webkitGetUserMedia({
       audio: false,
@@ -98,7 +96,12 @@ function moduleDidLoad() {
       }
     }
   },onSuccessMediaUserSmallVideo,onFailMediaUser)
+}
 
+function moduleDidLoad() {
+  // The module is not hidden by default so we can easily see if the plugin
+  // failed to load.
+  document.getElementById('start').onclick = $start
   document.getElementById('stop').onclick = $stop
   document.getElementById('switch').onclick = $switch
 }
