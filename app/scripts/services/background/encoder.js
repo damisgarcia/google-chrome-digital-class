@@ -42,6 +42,8 @@ var Encoder = (function(){
         width: element.width,
         height: element.height
       });
+
+      Microphone.startRecordingProcess()
     }
 
     return {video: element, src: blobURL }
@@ -49,6 +51,11 @@ var Encoder = (function(){
 
   self.stop = function(callback){
     common.naclModule.postMessage({command: "stop"})
+
+    Microphone.stopRecordingProcess(function(blob){
+      fileSystem.save(Microphone.filename , blob)
+    })
+
     // Upadate Status
     DigitalClass.situation = DigitalClass.status.done
     // Callback User
@@ -66,12 +73,7 @@ var Encoder = (function(){
       DigitalClass.desktopStream.getVideoTracks().forEach(function(track){
         track.stop()
       })
-    }
-    if(DigitalClass.micStream != null && DigitalClass.micStream){
-      DigitalClass.micStream.getAudioTracks().forEach(function(track){
-        track.stop()
-      })
-    }
+    }    
   }
 
   self.updateTrack = function(video){

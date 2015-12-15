@@ -19,18 +19,11 @@ self.onmessage = function(event) {
                                      data.quality);
       buffers = data.process === 'separate' ? [] : undefined;
       break;
-    case 'record':      
-      if (buffers != null){
-        buffers.push(data.buffers);
-      }
-      else{
-        encoder.encode(data.buffers);
-      }
+    case 'record':
+      encoder.encode(data.buffers);
       break;
     case 'finish':
-      if (buffers != null)
-        while (buffers.length > 0)
-          encoder.encode(buffers.shift());
+      if (buffers != null)        
         self.postMessage({ blob: encoder.finish() });
       encoder = undefined;
       break;

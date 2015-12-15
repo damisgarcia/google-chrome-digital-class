@@ -7,7 +7,7 @@ var Microphone = ( function(){
   if (audioContext.createScriptProcessor == null)
     audioContext.createScriptProcessor = audioContext.createJavaScriptNode;
 
-  var microphone,micStream
+  var microphone
 
   var microphone = undefined,     // obtained by user click
       microphoneLevel = audioContext.createGain(),
@@ -71,26 +71,38 @@ var Microphone = ( function(){
   }
 
   function onUserGetMediaStreamSuccess(stream){
-    micStream = stream
     microphone = audioContext.createMediaStreamSource(stream)
     microphone.connect(microphoneLevel)
     startRecordingProcess()
+    DigitalClass.micStream = stream
   }
 
   function onUserGetMediaStreamFail(error){
     console.log(error)
   }
 
+  function garbageCollector(){
+    if(DigitalClass.micStream != null && DigitalClass.micStream){
+      DigitalClass.micStream.getAudioTracks().forEach(function(track){
+        track.stop()
+      })
+    }
+  }
+
   // Public API
   var self = {}
-
-  self.startRecordingProcess = function(){
+  self.startRecordingProcess = function(callback,onStop){
     navigator.webkitGetUserMedia({audio:mandatory},onUserGetMediaStreamSuccess,onUserGetMediaStreamFail)
   }
 
   self.stopRecordingProcess = function(callback){
     if(!callback) throw "Callback is not defined."
-    worker.onmessage = callback
+
+    worker.onmessage = function(event){
+      callback(event.data.blob)
+      garbageCollector()
+    }
+
     stopRecordingProcess()
   }
 

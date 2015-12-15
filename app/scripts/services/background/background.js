@@ -4,6 +4,8 @@
 
 'use strict'
 
+var RELOAD_WAIT = 3000
+
 // Comunication with NACL modules
 function moduleDidLoad() {
   // The module is not hidden by default so we can easily see if the plugin
@@ -32,28 +34,17 @@ function moduleDidLoad() {
         getUserScreen.getDesktop(function(stream){
           DigitalClass.desktopStream = stream
           var filename = DigitalClass.$generateFileName()
-
+          Microphone.filename = filename + ".wav"
           var options = {
             filename: filename + ".webm",
             width: window.screen.width,
-            height: window.screen.height
+            height: window.screen.height,
+            saveDisk: true
           }
 
           function onstop(){
-            console.debug("Video Done!")
+            callRepositoryWindow(filename + ".webm")
           }
-
-          getUserMedia.getMicrophone(function(stream){
-            DigitalClass.micStream = stream
-
-            stream.onended = function(){
-              getUserMedia.stopRecordMicrophone(function(blob){
-                fileSystem.save(filename + ".wav",blob)
-                chrome.tabs.create({url: "index.html#repositories/" + options.filename})
-              })
-            }
-            getUserMedia.startRecordMicrophone(stream)
-          })
 
           var response = Encoder.start(stream,options,onstop)
           port.postMessage({action:"desktop request stream",stream: response.src, status: DigitalClass.situation})
@@ -67,24 +58,13 @@ function moduleDidLoad() {
           var options = {
             filename: filename + ".webm",
             width: 640,
-            height: 480
+            height: 480,
+            saveDisk: true
           }
 
           function onstop(){
-            console.debug("Video stream Done!")
+            callRepositoryWindow(filename + ".webm")
           }
-
-          getUserMedia.getMicrophone(function(stream){
-            DigitalClass.micStream = stream
-
-            stream.onended = function(){
-              getUserMedia.stopRecordMicrophone(function(blob){
-                fileSystem.save(filename + ".wav",blob)
-                chrome.tabs.create({url: "index.html#repositories/" + options.filename})
-              })
-            }
-            getUserMedia.startRecordMicrophone(stream)
-          })
 
           var response = Encoder.start(stream,options,onstop)
           port.postMessage({ action:"webcam request stream",stream: response.src, status: DigitalClass.situation })
@@ -104,21 +84,8 @@ function moduleDidLoad() {
             }
 
             function onstop(){
-              setTimeout(function(){
-                chrome.tabs.create({url: "index.html#repositories/" + filename + ".webm"})
-              },2000)
+              callRepositoryWindow(filename + ".webm")
             }
-
-            // getUserMedia.getMicrophone(function(stream){
-            //   DigitalClass.micStream = stream
-            //   stream.onended = function(){
-            //     getUserMedia.stopRecordMicrophone(function(blob){
-            //       fileSystem.save(filename + ".wav",blob)
-            //       chrome.tabs.create({url: "index.html#repositories/" + filename + ".webm"})
-            //     })
-            //   }
-            //   getUserMedia.startRecordMicrophone(stream)
-            // })
 
             $camera = Encoder.start(stream,options,onstop)
             port.postMessage({ action:"webcam request stream", stream: $camera.src, status: DigitalClass.situation })
@@ -181,4 +148,13 @@ function moduleDidLoad() {
       }
     })
   })
+}
+
+
+
+function callRepositoryWindow(filename){
+  setTimeout( function(){
+    chrome.windows.create({url:"/index.html#/repositories/"+filename}, null)
+    setTimeout(Encoder.reload,RELOAD_WAIT*2)
+  }, RELOAD_WAIT)
 }
