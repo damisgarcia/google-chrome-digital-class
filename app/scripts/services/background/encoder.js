@@ -10,8 +10,6 @@
 var Encoder = (function(){
   var self = {}
 
-  self.element = null
-
   self.start = function(stream,options,onStop){
     if(!options) throw "Not found options"
 
@@ -22,40 +20,47 @@ var Encoder = (function(){
     var saveDisk = options.hasOwnProperty('saveDisk')
 
 
-    self.element = document.createElement("video")
-    self.element.src = blobURL
-    self.element.width = options.width
-    self.element.height = options.height
-    self.element.track = videoTrack
-    self.element.play()
+    var element = document.createElement("video")
+    element.src = blobURL
+    element.width = options.width
+    element.height = options.height
+    element.track = videoTrack
+    element.play()
+    document.body.appendChild(element)
 
-    self.element.track.onended = function(){
+    element.track.onended = function(){
       self.stop(onStop)
+      element = false
     }
 
     if(saveDisk && options.saveDisk){
       common.naclModule.postMessage({
         command: 'start',
         file_name: options.filename,
-        video_track: self.element.track,
+        video_track: element.track,
         profile: 'vp8',
-        width: self.element.width,
-        height: self.element.height
+        width: element.width,
+        height: element.height
       });
+
+      Microphone.startRecordingProcess()
     }
 
-    return blobURL
+    return {video: element, src: blobURL }
   }
 
   self.stop = function(callback){
-    if(!callback) throw "Not found return function"
     common.naclModule.postMessage({command: "stop"})
-    // Stop all streams actives
-    self.stopRecords()
+
+    Microphone.stopRecordingProcess(function(blob){
+      fileSystem.save(Microphone.filename , blob)
+    })
+
     // Upadate Status
     DigitalClass.situation = DigitalClass.status.done
     // Callback User
-    callback()
+    if(callback) callback()
+    self.stopRecords()
   }
 
   self.stopRecords = function(){
@@ -68,40 +73,31 @@ var Encoder = (function(){
       DigitalClass.desktopStream.getVideoTracks().forEach(function(track){
         track.stop()
       })
-    }
-    if(DigitalClass.micStream != null && DigitalClass.micStream){
-      DigitalClass.micStream.getAudioTracks().forEach(function(track){
-        track.stop()
-      })
-    }
+    }    
   }
 
-  self.changeTrack = function(stream){
-    self.element.track = stream.getVideoTracks()[0]
-  }
-
-  self.updateTrack = function(){
+  self.updateTrack = function(video){
     common.naclModule.postMessage({
       command: 'change_track',
-      video_track: self.element.track
+      video_track: video.track
     });
   }
 
-  self.saveFrame = function(filename){
-    var canvas = document.createElement("canvas")
-    canvas.width = self.element.width
-    canvas.height = self.element.height
-    var ctx = canvas.getContext("2d")
-    ctx.drawImage(self.element,0,0)
-    var base64 = canvas.toDataURL("image/png",0.1)
-    console.log(base64)
-    var blob = new Blob([base64],{type:"image/png"})
-    fileSystem.save(filename+".png",blob)
-  }
-
-  // self.reload = function(){
-  //   window.location.reload()
+  // self.saveFrame = function(filename){
+  //   var canvas = document.createElement("canvas")
+  //   canvas.width = self.element.width
+  //   canvas.height = self.element.height
+  //   var ctx = canvas.getContext("2d")
+  //   ctx.drawImage(self.element,0,0)
+  //   var base64 = canvas.toDataURL("image/png",0.1)
+  //   console.log(base64)
+  //   var blob = new Blob([base64],{type:"image/png"})
+  //   fileSystem.save(filename+".png",blob)
   // }
+
+  self.reload = function(){
+    window.location.reload()
+  }
 
   return self
 }(Encoder))

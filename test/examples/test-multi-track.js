@@ -28,7 +28,7 @@ function onSuccessStream(stream){
   videoBg.height = window.screen.height
   videoBg.track = window.MediaUserVideoTrack
   videoBg.play()
-  record("screen-camera.webm",videoBg)  
+  record("screen-camera.webm",videoBg)
 }
 
 function onSuccessMediaUserSmallVideo(stream){
@@ -51,20 +51,28 @@ window.$stop = function (e){
  window.$switch = function(e){
   e.preventDefault()
   big ? big = false : big = true
-  common.naclModule.postMessage({
-    command: 'change_track',
-    video_track: videoSm.track
-  });
   if(big){
-    console.log(window.MediaUserSmallVideoTrack)
+    videoBg.pause()
+    videoSm.pause()
+    common.naclModule.postMessage({
+      command: 'change_track',
+      video_track: videoBg.track
+    });
+    videoBg.play()
+    videoSm.play()
   } else{
-    console.log(window.MediaUserVideoTrack)
+    videoBg.pause()
+    videoSm.pause()
+    common.naclModule.postMessage({
+      command: 'change_track',
+      video_track: videoSm.track
+    });
+    videoBg.play()
+    videoSm.play()
   }
 }
 
-function moduleDidLoad() {
-  // The module is not hidden by default so we can easily see if the plugin
-  // failed to load.
+window.$start = function(e){
   chrome.desktopCapture.chooseDesktopMedia(['window','screen'], function(desktop_id){
     navigator.webkitGetUserMedia({
       audio: false,
@@ -72,17 +80,28 @@ function moduleDidLoad() {
         mandatory: {
           chromeMediaSource: 'desktop',
           chromeMediaSourceId: desktop_id,
-          maxWidth:  window.screen.availWidth,
-          maxHeight: window.screen.availHeight
+          maxWidth:  window.screen.width,
+          maxHeight: window.screen.height
         }
       }
     },onSuccessStream,onFailMediaUser)
   })
 
   navigator.webkitGetUserMedia({
-    video:true
+    audio:false,
+    video: {
+      mandatory: {
+        maxWidth:  window.screen.width,
+        maxHeight: window.screen.height
+      }
+    }
   },onSuccessMediaUserSmallVideo,onFailMediaUser)
+}
 
+function moduleDidLoad() {
+  // The module is not hidden by default so we can easily see if the plugin
+  // failed to load.
+  document.getElementById('start').onclick = $start
   document.getElementById('stop').onclick = $stop
   document.getElementById('switch').onclick = $switch
 }

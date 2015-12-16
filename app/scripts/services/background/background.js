@@ -3,15 +3,14 @@
 // found in the LICENSE file.
 
 'use strict'
-//
+
+var RELOAD_WAIT = 3000
+
 // Comunication with NACL modules
-//
-
-
-
 function moduleDidLoad() {
   // The module is not hidden by default so we can easily see if the plugin
   // failed to load.
+  var $desktop, $camera, $desktopInRecorder
   chrome.runtime.onConnect.addListener(function(port) {
     port.onMessage.addListener(function(res){
       if(res.action == "status"){
@@ -28,39 +27,27 @@ function moduleDidLoad() {
         var camera = StreamHelper.to_url(DigitalClass.camStream)
         var desktop = StreamHelper.to_url(DigitalClass.desktopStream)
         var mic = StreamHelper.to_url(DigitalClass.micStream)
-
-        port.postMessage({action:"take stream records", $camera: camera, $desktop: desktop, $mic:mic })
+        port.postMessage({action:"take stream records", $camera: camera, $desktop: desktop, $mic:mic, desktop_is_focus: $desktopInRecorder, status: DigitalClass.situation })
       }
 
       else if(res.action == "desktop request stream"){
         getUserScreen.getDesktop(function(stream){
           DigitalClass.desktopStream = stream
           var filename = DigitalClass.$generateFileName()
-
+          Microphone.filename = filename + ".wav"
           var options = {
             filename: filename + ".webm",
             width: window.screen.width,
-            height: window.screen.height
+            height: window.screen.height,
+            saveDisk: true
           }
 
           function onstop(){
-            console.debug("Video Done!")
+            callRepositoryWindow(filename + ".webm")
           }
 
-          getUserMedia.getMicrophone(function(stream){
-            DigitalClass.micStream = stream
-
-            stream.onended = function(){
-              getUserMedia.stopRecordMicrophone(function(blob){
-                fileSystem.save(filename + ".wav",blob)
-                chrome.tabs.create({url: "index.html#repositories/" + options.filename})
-              })
-            }
-            getUserMedia.startRecordMicrophone(stream)
-          })
-
-          var blobURL = Encoder.start(stream,options,onstop)
-          port.postMessage({action:"desktop request stream",stream: blobURL, status: DigitalClass.situation})
+          var response = Encoder.start(stream,options,onstop)
+          port.postMessage({action:"desktop request stream",stream: response.src, status: DigitalClass.situation})
         })
       }
 
@@ -71,85 +58,61 @@ function moduleDidLoad() {
           var options = {
             filename: filename + ".webm",
             width: 640,
-            height: 480
+            height: 480,
+            saveDisk: true
           }
 
           function onstop(){
-            console.debug("Video stream Done!")
+            callRepositoryWindow(filename + ".webm")
           }
 
-          getUserMedia.getMicrophone(function(stream){
-            DigitalClass.micStream = stream
-
-            stream.onended = function(){
-              getUserMedia.stopRecordMicrophone(function(blob){
-                fileSystem.save(filename + ".wav",blob)
-                chrome.tabs.create({url: "index.html#repositories/" + options.filename})
-              })
-            }
-            getUserMedia.startRecordMicrophone(stream)
-          })
-
-          var blobURL = Encoder.start(stream,options,onstop)
-          port.postMessage({ action:"webcam request stream",stream: blobURL, status: DigitalClass.situation })
+          var response = Encoder.start(stream,options,onstop)
+          port.postMessage({ action:"webcam request stream",stream: response.src, status: DigitalClass.situation })
         })
       }
 
       else if(res.action == "desktop with camera request stream"){
         var filename = DigitalClass.$generateFileName()
-
         getUserScreen.getDesktop(function(stream){
           DigitalClass.desktopStream = stream
-
           getUserMedia.getWebCam(function(stream){
             DigitalClass.camStream = stream
+
             var options = {
               width: 640,
               height: 480
             }
 
             function onstop(){
-              console.debug("Video stream Done!")
+              callRepositoryWindow(filename + ".webm")
             }
 
-            getUserMedia.getMicrophone(function(stream){
-              DigitalClass.micStream = stream
-
-              stream.onended = function(){
-                getUserMedia.stopRecordMicrophone(function(blob){
-                  fileSystem.save(filename + ".wav",blob)
-                  chrome.tabs.create({url: "index.html#repositories/" + options.filename})
-                })
-              }
-              getUserMedia.startRecordMicrophone(stream)
-            })
-
-            var blobURL = Encoder.start(stream,options,onstop)
-            port.postMessage({ action:"webcam request stream",stream: blobURL, status: DigitalClass.situation })
+            $camera = Encoder.start(stream,options,onstop)
+            port.postMessage({ action:"webcam request stream", stream: $camera.src, status: DigitalClass.situation })
           })
 
           var options = {
-            filename: filename + "_desktop" + ".webm",
+            filename: filename + ".webm",
             width: window.screen.width,
             height: window.screen.height,
             saveDisk: true
           }
 
-          function onstop(){
-            chrome.tabs.create({url: DigitalClass.filesystem + options.filename})
-          }
-
-          var blobURL = Encoder.start(stream,options,onstop)
-
-          setTimeout(function(){
-            Encoder.changeTrack(DigitalClass.camStream)
-            Encoder.updateTrack()
-          },5000)
-
-          port.postMessage({action:"desktop request stream",stream: blobURL, status: DigitalClass.situation})
+          $desktop = Encoder.start(stream,options,null)
+          // Set Primary View
+          $desktopInRecorder = true
+          port.postMessage({action:"desktop request stream",stream: $desktop.src, status: DigitalClass.situation})
         })
       }
+      else if (res.action == "focus desktop") {
+        if($desktop) Encoder.updateTrack($desktop.video)
+        $desktopInRecorder = true
+      }
 
+      else if (res.action == "focus webcam") {
+        if($camera) Encoder.updateTrack($camera.video)
+        $desktopInRecorder = false
+      }
       // Repositories Routes
       else if(res.action == "repositories list"){
         fileSystem.list(function(repositories){
@@ -185,4 +148,13 @@ function moduleDidLoad() {
       }
     })
   })
+}
+
+
+
+function callRepositoryWindow(filename){
+  setTimeout( function(){
+    chrome.windows.create({url:"/index.html#/repositories/"+filename}, null)
+    setTimeout(Encoder.reload,RELOAD_WAIT*2)
+  }, RELOAD_WAIT)
 }
