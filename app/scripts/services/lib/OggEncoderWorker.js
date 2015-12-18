@@ -23,8 +23,13 @@ self.onmessage = function(event) {
       encoder.encode(data.buffers);
       break;
     case 'finish':
-      if (buffers != null)        
-        self.postMessage({ blob: encoder.finish() });
+      if (buffers != null)
+        try{
+          self.postMessage({ blob: encoder.finish() });
+        }
+        catch (e){          
+          console.warn(e)
+        }
       encoder = undefined;
       break;
     case 'cancel':

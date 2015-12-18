@@ -8,20 +8,43 @@
  * Controller of the digitalclassApp
  */
 angular.module('digitalclassApp')
-  .controller('RepositoriesCtrl', function ($scope) {
+  .controller('RepositoriesCtrl', function ($scope,$cookieStore,$state,ngDialog) {
     var self = this
     var background = chrome.runtime.connect({name:"background repositories"})
 
+    this.profile = $cookieStore.get('profile')
+
     background.onMessage.addListener(function(res){
       if(res.action == "repositories list"){
-        self.files = res.files
+        self.files = filterFileByWebm(res.files)
       }
       $scope.$apply()
-    })    
+    })
+
+    self.openUpload = function(index){
+      $state.go("repositories.upload")
+      self.select_file = self.files[index]
+      ngDialog.open({
+        template: 'app/views/repositories-upload.html',
+        controller:"RepositoriesUploadCtrl as repository",
+        scope: $scope
+      })
+    }
 
     self.destroy = function(index){
       if(confirm("Really delete this file"))
       background.postMessage({action:"repositories destroy", filename: self.files[index].$name})
+    }
+
+    // Find for file in repository with .Webm extension
+    function filterFileByWebm(files){
+      var a = []
+      angular.forEach(files, function(file,index){
+        if(file.$name.match(/\.webm$/)){
+          a.push(file)
+        }
+      })
+      return a
     }
 
     background.postMessage({action:"repositories list"})

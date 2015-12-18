@@ -23,6 +23,8 @@
     "desktopCapture",
     "tabCapture",
     "storage",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "tabs",
+    "http://127.0.0.1:*/*"
   ]
 }

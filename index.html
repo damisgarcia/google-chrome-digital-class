@@ -8,6 +8,8 @@
     <title>Digital Class</title>
     <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="bower_components/angular-bootstrap/ui-bootstrap-csp.css" rel="stylesheet">
+    <link href="bower_components/ng-dialog/css/ngDialog.min.css" rel="stylesheet">
+    <link href="bower_components/ng-dialog/css/ngDialog-theme-default.min.css" rel="stylesheet">
     <link href="bower_components/metro-bootstrap/dist/css/metro-bootstrap.min.css" rel="stylesheet">
     <link href="bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="app/styles/color.css" rel="stylesheet">
@@ -26,6 +28,7 @@
     <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
     <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
     <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+    <script src="bower_components/ng-dialog/js/ngDialog.min.js"></script>
 
     <script src="bower_components/videogular/videogular.js"></script>
     <script src="bower_components/videogular-controls/vg-controls.js"></script>
@@ -37,15 +40,18 @@
 
     <script src="app/scripts/controllers/home.js"></script>
     <script src="app/scripts/controllers/configure.js"></script>
+    <script src="app/scripts/controllers/login.js"></script>
+    <script src="app/scripts/controllers/profile.js"></script>
     <script src="app/scripts/controllers/desktop.js"></script>
     <script src="app/scripts/controllers/desktop-with-camera.js"></script>
     <script src="app/scripts/controllers/webcam.js"></script>
     <script src="app/scripts/controllers/repositories.js"></script>
     <script src="app/scripts/controllers/repositories-show.js"></script>
+    <script src="app/scripts/controllers/repositories-upload.js"></script>
 
     <script src="app/scripts/directives/navbar-top.js"></script>
-
-    <script src="app/scripts/services/digitalclass.js"></script>
+    <script src="app/scripts/services/auth.js"></script>
+    <script src="app/scripts/services/profile.js"></script>
     <!-- The NaCl plugin will be embedded inside the element with id "listener".
         See common.js.-->
   </body>

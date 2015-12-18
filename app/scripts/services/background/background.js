@@ -1,7 +1,3 @@
-// Copyright (c) 2013 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 'use strict'
 
 var RELOAD_WAIT = 3000
@@ -34,9 +30,8 @@ function moduleDidLoad() {
         getUserScreen.getDesktop(function(stream){
           DigitalClass.desktopStream = stream
           var filename = DigitalClass.$generateFileName()
-          Microphone.filename = filename + ".wav"
           var options = {
-            filename: filename + ".webm",
+            filename: filename,
             width: window.screen.width,
             height: window.screen.height,
             saveDisk: true
@@ -56,7 +51,7 @@ function moduleDidLoad() {
           DigitalClass.camStream = stream
           var filename = DigitalClass.$generateFileName()
           var options = {
-            filename: filename + ".webm",
+            filename: filename,
             width: 640,
             height: 480,
             saveDisk: true
@@ -92,7 +87,7 @@ function moduleDidLoad() {
           })
 
           var options = {
-            filename: filename + ".webm",
+            filename: filename,
             width: window.screen.width,
             height: window.screen.height,
             saveDisk: true
@@ -154,7 +149,7 @@ function moduleDidLoad() {
 
 function callRepositoryWindow(filename){
   setTimeout( function(){
-    chrome.windows.create({url:"/index.html#/repositories/"+filename}, null)
-    setTimeout(Encoder.reload,RELOAD_WAIT*2)
+    chrome.tabs.create({url:"/index.html#/repositories/"+filename}, null)
+    // setTimeout(Encoder.reload,RELOAD_WAIT*2)
   }, RELOAD_WAIT)
 }

@@ -1,0 +1,15 @@
+<div class="container">
+  <h3>{{ profile.$this.name || profile.$this.email }}</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tr ng-repeat="lesson in profile.$this.lessons">
+      <td>{{lesson.name}}</td>
+      <td>{{lesson.description || "Empty"}}</td>
+    </tr>
+  </table>
+</div>

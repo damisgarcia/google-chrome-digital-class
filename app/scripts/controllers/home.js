@@ -10,4 +10,5 @@
 angular.module('digitalclassApp')
   .controller('HomeCtrl', function ($state,$cookieStore) {
     var background = chrome.runtime.connect({name:"home background"})
+    this.profile = $cookieStore.get('profile')
   });

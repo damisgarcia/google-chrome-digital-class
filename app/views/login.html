@@ -1,0 +1,12 @@
+<div class="container">
+  <h3>Login</h3>
+  <form ng-submit="login.sigin($event)">
+    <div class="form-group">
+      <input type="text" class="form-control" ng-model="login.email" placeholder="Email"/>
+    </div>
+    <div class="form-group">
+      <input type="password" class="form-control" ng-model="login.password" placeholder="Password"/>
+    </div>
+    <button class="btn btn-primary btn-lg btn-block" ng-disabled="login.process" type="submit">Sigin</button>
+  </form>
+</div>

@@ -7,6 +7,9 @@
  * # canvasEncoder
  * Factory in the digitalclassApp.
  */
+
+var WAIT_TIME_STOP_RECORDS = 600
+
 var Encoder = (function(){
   var self = {}
 
@@ -26,7 +29,6 @@ var Encoder = (function(){
     element.height = options.height
     element.track = videoTrack
     element.play()
-    document.body.appendChild(element)
 
     element.track.onended = function(){
       self.stop(onStop)
@@ -36,13 +38,14 @@ var Encoder = (function(){
     if(saveDisk && options.saveDisk){
       common.naclModule.postMessage({
         command: 'start',
-        file_name: options.filename,
+        file_name: options.filename + ".webm",
         video_track: element.track,
         profile: 'vp8',
         width: element.width,
         height: element.height
       });
-
+      // Microphone Device
+      Microphone.filename = options.filename + ".wav"
       Microphone.startRecordingProcess()
     }
 
@@ -50,17 +53,15 @@ var Encoder = (function(){
   }
 
   self.stop = function(callback){
-    common.naclModule.postMessage({command: "stop"})
+    if(DigitalClass.situation != DigitalClass.status.paused)
+      Microphone.stopRecordingProcess(function(blob){
+        fileSystem.save(Microphone.filename , blob)
+        DigitalClass.situation = DigitalClass.status.done
+      })
 
-    Microphone.stopRecordingProcess(function(blob){
-      fileSystem.save(Microphone.filename , blob)
-    })
-
-    // Upadate Status
-    DigitalClass.situation = DigitalClass.status.done
-    // Callback User
-    if(callback) callback()
-    self.stopRecords()
+      // Callback User
+      if(callback) callback()
+      self.stopRecords()
   }
 
   self.stopRecords = function(){
@@ -69,11 +70,19 @@ var Encoder = (function(){
         track.stop()
       })
     }
+
     if(DigitalClass.desktopStream != null && DigitalClass.desktopStream.active){
       DigitalClass.desktopStream.getVideoTracks().forEach(function(track){
         track.stop()
       })
-    }    
+    }
+
+    // Stop Module
+    setTimeout(function(){
+      common.naclModule.postMessage({command: "stop"})
+    }, WAIT_TIME_STOP_RECORDS)
+
+    DigitalClass.situation = DigitalClass.status.paused
   }
 
   self.updateTrack = function(video){

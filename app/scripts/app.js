@@ -12,6 +12,7 @@ var background = chrome.runtime.connect({name:"background app"})
 angular.module('digitalclassApp',
     [
       'ngCookies',
+      'ngDialog',
       'ngSanitize',
       'com.2fdevs.videogular',
       'com.2fdevs.videogular.plugins.controls',
@@ -31,6 +32,26 @@ angular.module('digitalclassApp',
         "main":{
           templateUrl: "app/views/home.html",
           controller: "HomeCtrl as home"
+        }
+      }
+    })
+
+    .state('login', {
+      url: "/login",
+      views:{
+        "main":{
+          templateUrl: "app/views/login.html",
+          controller: "LoginCtrl as login"
+        }
+      }
+    })
+
+    .state('profile', {
+      url: "/profile",
+      views:{
+        "main":{
+          templateUrl: "app/views/profile.html",
+          controller: "ProfileCtrl as profile"
         }
       }
     })
@@ -96,10 +117,20 @@ angular.module('digitalclassApp',
       }
     })
 
+    .state('repositories.upload', {
+      parent:'repositories',      
+      templateUrl: "app/views/repositories-upload.html",
+      controller: "RepositoriesUploadCtrl as repository"
+    })
+
 })
 
 .run(function($rootScope,$cookieStore,$state){
   var blacklist = ["repositories","configure","repositories.show"]
+
+  $rootScope.$on('$stateChangeStart',function(event, toState, toParams, fromState, fromParams){
+    console.log($cookieStore.get('profile'))
+  })
 
   $rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
     if(!fromState.name && !blacklist.includes(toState.name)){

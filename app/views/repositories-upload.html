@@ -1,0 +1,42 @@
+<h1 class="text-center">
+  Upload File <br>
+  <small>{{repositories.select_file.$name}}</small>
+</h1>
+
+<br>
+
+<form ng-submit="">
+  <div class="form-group">
+    <h6>Privilege Level:</h6>
+    <label>Private</label>
+    <input class="margin-right" ng-checked="true" type="radio" ng-model="repository.privilege" ng-value="0"/>
+    <label>Public</label>
+    <input class="margin-right" type="radio" ng-model="repository.privilege" ng-value="1"/>
+  </div>
+
+  <div class="well well-sm">
+    <h6>Please select lesson for send to DigitalClass:</h6>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Lesson</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="lesson in repositories.profile.lessons">
+          <td>
+            <input class="margin-right" type="radio" ng-model="repository.lesson" ng-value="lesson.id"/>
+            <label>{{lesson.name}}</label>
+          </td>
+          <td><small>{{lesson.description || "Empty"}}</small></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="form-group">
+    <h6>Tags:</h6>
+    <input type="text" class="form-control" ng-model="repository.tags" placeholder="Input Tags">
+  </div>
+  <button type="submit" class="btn btn-large btn-success btn-block"><big>Start Upload</big></button>
+</form>
