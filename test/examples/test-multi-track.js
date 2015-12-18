@@ -8,14 +8,17 @@ window.big = true
 var videoBg;
 var videoSm;
 
-function record(filename,video){
+function record(filename){
+  console.log("Tamanho Small: ("+videoSm.width+","+videoSm.height+")");
+  console.log("Tamanho Big: ("+videoBg.width+","+videoBg.height+")");
+
   common.naclModule.postMessage({
     command: 'start',
     file_name: filename,
-    video_track: video.track,
+    video_track: [ videoSm.track, videoBg.track ],
     profile: 'vp8',
-    width: video.width,
-    height: video.height
+    width: videoSm.width,
+    height: videoSm.height
   });
 }
 
@@ -27,8 +30,18 @@ function onSuccessStream(stream){
   videoBg.width = window.screen.width
   videoBg.height = window.screen.height
   videoBg.track = window.MediaUserVideoTrack
-  videoBg.play()
-  record("screen-camera.webm",videoBg)
+  videoBg.play()  
+
+ navigator.webkitGetUserMedia({
+    audio:false,
+    video: {
+      mandatory: {
+        maxWidth:  window.screen.width,
+        maxHeight: window.screen.height
+      }
+    }
+  },onSuccessMediaUserSmallVideo,onFailMediaUser)
+
 }
 
 function onSuccessMediaUserSmallVideo(stream){
@@ -37,6 +50,8 @@ function onSuccessMediaUserSmallVideo(stream){
   videoSm.src = URL.createObjectURL(stream)
   videoSm.track = window.MediaUserSmallVideoTrack
   videoSm.play()
+
+  record("video.webm",videoSm,videoBg);
 }
 
 function onFailMediaUser(error){
@@ -46,6 +61,11 @@ function onFailMediaUser(error){
 window.$stop = function (e){
   e.preventDefault()
   common.naclModule.postMessage({command: "stop"})
+  setTimeout(function (){
+    //videoSm.getVideoTracks()[0].stop()
+    //videoBg.getVideoTracks()[0].stop()
+  },1000)
+
 }
 
  window.$switch = function(e){
@@ -56,7 +76,7 @@ window.$stop = function (e){
     videoSm.pause()
     common.naclModule.postMessage({
       command: 'change_track',
-      video_track: videoBg.track
+      video_track: 1
     });
     videoBg.play()
     videoSm.play()
@@ -65,7 +85,7 @@ window.$stop = function (e){
     videoSm.pause()
     common.naclModule.postMessage({
       command: 'change_track',
-      video_track: videoSm.track
+      video_track: 0
     });
     videoBg.play()
     videoSm.play()
@@ -73,7 +93,7 @@ window.$stop = function (e){
 }
 
 window.$start = function(e){
-  chrome.desktopCapture.chooseDesktopMedia(['window','screen'], function(desktop_id){
+chrome.desktopCapture.chooseDesktopMedia(['window','screen'], function(desktop_id){
     navigator.webkitGetUserMedia({
       audio: false,
       video: {
@@ -87,15 +107,10 @@ window.$start = function(e){
     },onSuccessStream,onFailMediaUser)
   })
 
-  navigator.webkitGetUserMedia({
-    audio:false,
-    video: {
-      mandatory: {
-        maxWidth:  window.screen.width,
-        maxHeight: window.screen.height
-      }
-    }
-  },onSuccessMediaUserSmallVideo,onFailMediaUser)
+ 
+
+ 
+
 }
 
 function moduleDidLoad() {
@@ -104,4 +119,6 @@ function moduleDidLoad() {
   document.getElementById('start').onclick = $start
   document.getElementById('stop').onclick = $stop
   document.getElementById('switch').onclick = $switch
+
+  
 }
