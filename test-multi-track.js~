@@ -3,22 +3,23 @@
 //
 
 'use strict'
-
+var smallComplete = false;
+var bigComplete = false;
+var recording = false;
+var isDesktop = false;
 window.big = true
 var videoBg;
 var videoSm;
 
 function record(filename){
-  console.log("Tamanho Small: ("+videoSm.width+","+videoSm.height+")");
-  console.log("Tamanho Big: ("+videoBg.width+","+videoBg.height+")");
-
+  console.log(videoBg,videoSm);
   common.naclModule.postMessage({
     command: 'start',
     file_name: filename,
-    video_track: [ videoBg.track, videoSm.track ],
+    video_track:[ videoBg.track, videoSm.track ],
     profile: 'vp8',
-    width: videoBg.width,
-    height: videoBg.height
+    width: video.width,
+    height: video.height
   });
 }
 
@@ -31,17 +32,6 @@ function onSuccessStream(stream){
   videoBg.height = window.screen.height
   videoBg.track = window.MediaUserVideoTrack
   videoBg.play()  
-
- navigator.webkitGetUserMedia({
-    audio:false,
-    video: {
-      mandatory: {
-        maxWidth:  window.screen.width,
-        maxHeight: window.screen.height
-      }
-    }
-  },onSuccessMediaUserSmallVideo,onFailMediaUser)
-
 }
 
 function onSuccessMediaUserSmallVideo(stream){
@@ -51,8 +41,9 @@ function onSuccessMediaUserSmallVideo(stream){
   videoSm.track = window.MediaUserSmallVideoTrack
   videoSm.play()
 
-  record("video.webm",videoSm,videoBg);
 }
+
+
 
 function onFailMediaUser(error){
   console.debug(error)
@@ -61,64 +52,48 @@ function onFailMediaUser(error){
 window.$stop = function (e){
   e.preventDefault()
   common.naclModule.postMessage({command: "stop"})
-  setTimeout(function (){
-    //videoSm.getVideoTracks()[0].stop()
-    //videoBg.getVideoTracks()[0].stop()
-  },1000)
-
 }
 
- window.$switch = function(e){
+window.$switch = function(e){
   e.preventDefault()
   big ? big = false : big = true
+  var toChange = videoBg;  
+  if(isDesktop){
+    toChange = videoSm;
+  }
+  common.naclModule.postMessage({
+    command: 'change_track',
+    video_track:toChange.track
+  });
+  isDesktop = !isDesktop;
   if(big){
-    videoBg.pause()
-    videoSm.pause()
-    common.naclModule.postMessage({
-      command: 'change_track',
-      video_track: 1
-    });
-    videoBg.play()
-    videoSm.play()
+    console.log(window.MediaUserSmallVideoTrack)
   } else{
-    videoBg.pause()
-    videoSm.pause()
-    common.naclModule.postMessage({
-      command: 'change_track',
-      video_track: 0
-    });
-    videoBg.play()
-    videoSm.play()
+    console.log(window.MediaUserVideoTrack)
   }
 }
 
-window.$start = function(e){
-chrome.desktopCapture.chooseDesktopMedia(['window','screen'], function(desktop_id){
+function moduleDidLoad() {
+  // The module is not hidden by default so we can easily see if the plugin
+  // failed to load.
+  chrome.desktopCapture.chooseDesktopMedia(['window','screen'], function(desktop_id){
     navigator.webkitGetUserMedia({
       audio: false,
       video: {
         mandatory: {
           chromeMediaSource: 'desktop',
           chromeMediaSourceId: desktop_id,
-          maxWidth:  window.screen.width,
-          maxHeight: window.screen.height
+          maxWidth:  window.screen.availWidth,
+          maxHeight: window.screen.availHeight
         }
       }
     },onSuccessStream,onFailMediaUser)
   })
 
- 
+  navigator.webkitGetUserMedia({
+    video:true
+  },onSuccessMediaUserSmallVideo,onFailMediaUser)
 
- 
-
-}
-
-function moduleDidLoad() {
-  // The module is not hidden by default so we can easily see if the plugin
-  // failed to load.
-  document.getElementById('start').onclick = $start
   document.getElementById('stop').onclick = $stop
   document.getElementById('switch').onclick = $switch
-
-  
 }

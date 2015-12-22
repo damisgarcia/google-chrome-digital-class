@@ -10,15 +10,15 @@ var videoSm;
 
 function record(filename){
   console.log("Tamanho Small: ("+videoSm.width+","+videoSm.height+")");
-  console.log("Tamanho Big: ("+videoBg.width+","videoBg.height+")");
+  console.log("Tamanho Big: ("+videoBg.width+","+videoBg.height+")");
 
   common.naclModule.postMessage({
     command: 'start',
     file_name: filename,
-    video_track: [ videoSm.track, videoBg.track ],
+    video_track: [ videoBg.track, videoSm.track ],
     profile: 'vp8',
-    width: videoSm.width,
-    height: videoSm.height
+    width: videoBg.width,
+    height: videoBg.height
   });
 }
 
@@ -61,10 +61,10 @@ function onFailMediaUser(error){
 window.$stop = function (e){
   e.preventDefault()
   common.naclModule.postMessage({command: "stop"})
-  setTimeout(function (){
+  //setTimeout(function (){
     //videoSm.getVideoTracks()[0].stop()
     //videoBg.getVideoTracks()[0].stop()
-  },1000)
+  //},1000)
 
 }
 
