@@ -22,6 +22,7 @@
     "angular-bootstrap": "~0.14.3",
     "bootstrap": "~3.3.6",
     "metro-bootstrap": "*",
-    "Materialize": "materialize#~0.97.3"
+    "Materialize": "materialize#~0.97.3",
+    "ng-tags-input": "~3.0.0"
   }
 }

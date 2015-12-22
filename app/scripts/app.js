@@ -14,6 +14,7 @@ angular.module('digitalclassApp',
       'ngCookies',
       'ngDialog',
       'ngSanitize',
+      'ngTagsInput',
       'com.2fdevs.videogular',
       'com.2fdevs.videogular.plugins.controls',
       'com.2fdevs.videogular.plugins.overlayplay',
@@ -118,7 +119,7 @@ angular.module('digitalclassApp',
     })
 
     .state('repositories.upload', {
-      parent:'repositories',      
+      parent:'repositories',
       templateUrl: "app/views/repositories-upload.html",
       controller: "RepositoriesUploadCtrl as repository"
     })

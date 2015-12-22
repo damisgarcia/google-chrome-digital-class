@@ -13,43 +13,65 @@ var WAIT_TIME_STOP_RECORDS = 600
 var Encoder = (function(){
   var self = {}
 
-  self.start = function(stream,options,onStop){
+  self.start = function(m_stream, bg_stream,options,onStop){
     if(!options) throw "Not found options"
+    if(!m_stream) throw "Main stream is not null"
 
+    var videoTracks = []
     DigitalClass.situation = DigitalClass.status.recording
 
-    var videoTrack = stream.getVideoTracks()[0]
-    var blobURL = URL.createObjectURL(stream)
-    var saveDisk = options.hasOwnProperty('saveDisk')
+    var m_blob_url = URL.createObjectURL(m_stream)
+    var m_track = m_stream.getVideoTracks()[0]
 
+    videoTracks.push(m_track)
 
-    var element = document.createElement("video")
-    element.src = blobURL
-    element.width = options.width
-    element.height = options.height
-    element.track = videoTrack
-    element.play()
+    var main = document.createElement("video")
+    main.src = m_blob_url
+    main.width = options.width
+    main.height = options.height
+    main.track = videoTracks[0]
+    main.play()
 
-    element.track.onended = function(){
+    main.track.onended = function(){
       self.stop(onStop)
-      element = false
+      main = false
     }
 
-    if(saveDisk && options.saveDisk){
-      common.naclModule.postMessage({
-        command: 'start',
-        file_name: options.filename + ".webm",
-        video_track: element.track,
-        profile: 'vp8',
-        width: element.width,
-        height: element.height
-      });
-      // Microphone Device
-      Microphone.filename = options.filename + ".wav"
-      Microphone.startRecordingProcess()
+    // Optional
+    if(bg_stream){
+      var bg_blob_url = URL.createObjectURL(bg_stream)
+      var bg_track = bg_stream.getVideoTracks()[0]
+
+      videoTracks.push(m_track)
+
+      var bg = document.createElement("video")
+      bg.src = m_blob_url
+      bg.width = options.width
+      bg.height = options.height
+      bg.track = videoTracks[1]
+      bg.play()
     }
 
-    return {video: element, src: blobURL }
+    common.naclModule.postMessage({
+      command: 'start',
+      file_name: options.filename + ".webm",
+      video_track: videoTracks,
+      profile: 'vp8',
+      width: main.width,
+      height: main.height
+    });
+
+    // Microphone Device
+    Microphone.filename = options.filename + ".wav"
+    Microphone.startRecordingProcess()
+
+    var response = {  main:{ video: main, src: m_blob_url }  }
+
+    if(bg_stream){
+      response.bg = {  video: bg,  src: bg_blob_url }
+    }
+
+    return response
   }
 
   self.stop = function(callback){
@@ -94,7 +116,7 @@ var Encoder = (function(){
 
   // self.saveFrame = function(filename){
   //   var canvas = document.createElement("canvas")
-  //   canvas.width = self.element.width
+  //   canvas.width = self.main.width
   //   canvas.height = self.element.height
   //   var ctx = canvas.getContext("2d")
   //   ctx.drawImage(self.element,0,0)

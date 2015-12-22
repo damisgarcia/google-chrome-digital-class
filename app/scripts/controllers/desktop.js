@@ -27,13 +27,13 @@ angular.module('digitalclassApp')
 
       if(res.stream){
         var preview = document.getElementById('preview')
-        preview.src = res.stream
+        preview.src = res.stream.main.src
       }
       else if(res.action == "take stream records"){
         var preview = document.getElementById('preview')
         if(res.$desktop)
           preview.src = res.$desktop
-      }      
+      }
       $scope.$apply()
     })
 

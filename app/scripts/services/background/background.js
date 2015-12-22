@@ -4,6 +4,33 @@ var RELOAD_WAIT = 3000
 
 // Comunication with NACL modules
 function moduleDidLoad() {
+  // fileSystem.find_by_name("screen-camera.webm",function(f){
+  //   var xhr = new XMLHttpRequest();
+  //   var video = document.getElementById('file_test')
+  //   var blobVideo = new Blob();
+  //   xhr.open('GET', 'filesystem:chrome-extension://aiikidlhbncdaccodnmdffbgoepgaock/persistent/screen-camera.webm', true);
+  //   xhr.responseType = 'blob';
+  //   xhr.send()
+  //   // filesystem:chrome-extension://aiikidlhbncdaccodnmdffbgoepgaock/persistent/screen-camera.webm
+  //   // inject an image with the src url
+  //   xhr.onload = function(e) {
+  //     if (this.status == 200) {
+  //       callback(this.response);
+  //     }
+  //   };
+  //   // xhr.onreadystatechange = function (oEvent) {
+  //   //   var arrayBuffer = this.response;
+  //   //
+  //   //   if (this.readyState>3) {
+  //   //      var byteArray = new Uint8Array(arrayBuffer);
+  //   //      blobVideo = new Blob([byteArray], { type: "text" });
+  //   //      console.log(blobVideo)
+  //   //      var videoUrl = window.URL.createObjectURL(blobVideo);
+  //   //      video.src = videoUrl;
+  //   //   }
+  //   // }
+  // })
+
   // The module is not hidden by default so we can easily see if the plugin
   // failed to load.
   var $desktop, $camera, $desktopInRecorder
@@ -41,7 +68,7 @@ function moduleDidLoad() {
             callRepositoryWindow(filename + ".webm")
           }
 
-          var response = Encoder.start(stream,options,onstop)
+          var response = Encoder.start(stream,null,options,onstop)
           port.postMessage({action:"desktop request stream",stream: response.src, status: DigitalClass.situation})
         })
       }
@@ -62,7 +89,7 @@ function moduleDidLoad() {
           }
 
           var response = Encoder.start(stream,options,onstop)
-          port.postMessage({ action:"webcam request stream",stream: response.src, status: DigitalClass.situation })
+          port.postMessage({ action:"webcam request stream",stream: response, status: DigitalClass.situation })
         })
       }
 

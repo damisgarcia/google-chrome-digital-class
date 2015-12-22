@@ -5,11 +5,12 @@
 
 <br>
 
-<form ng-submit="">
+<form name="repositoryUpload" ng-submit="repository.upload()" ng-init="repository.privilege=0; repository.filename = repositories.select_file.$name;">
+  <input type="hidden" ng-model="repository.filename"/>
   <div class="form-group">
     <h6>Privilege Level:</h6>
     <label>Private</label>
-    <input class="margin-right" ng-checked="true" type="radio" ng-model="repository.privilege" ng-value="0"/>
+    <input class="margin-right" type="radio" ng-model="repository.privilege" ng-value="0"/>
     <label>Public</label>
     <input class="margin-right" type="radio" ng-model="repository.privilege" ng-value="1"/>
   </div>
@@ -26,7 +27,7 @@
       <tbody>
         <tr ng-repeat="lesson in repositories.profile.lessons">
           <td>
-            <input class="margin-right" type="radio" ng-model="repository.lesson" ng-value="lesson.id"/>
+            <input class="margin-right" type="radio" ng-model="repository.lesson" ng-value="lesson.id" required/>
             <label>{{lesson.name}}</label>
           </td>
           <td><small>{{lesson.description || "Empty"}}</small></td>
@@ -36,7 +37,7 @@
   </div>
   <div class="form-group">
     <h6>Tags:</h6>
-    <input type="text" class="form-control" ng-model="repository.tags" placeholder="Input Tags">
+    <tags-input ng-model="repository.tags" placeholder="Input Tags"></tags-input>
   </div>
-  <button type="submit" class="btn btn-large btn-success btn-block"><big>Start Upload</big></button>
+  <button type="submit" class="btn btn-large btn-success btn-block" ng-disabled="repository.disabled"><big>Start Upload</big></button>
 </form>

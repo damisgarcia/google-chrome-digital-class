@@ -30,8 +30,7 @@ var Microphone = ( function(){
 
   microphoneLevel.gain.value = 0.5;
   microphoneLevel.connect(mixer);
-  mixer.connect(input);
-  mixer.connect(audioContext.destination);
+  mixer.connect(input);  
   var BUFFER_SIZE = 2048
   var QUALITY =  0.2
 

@@ -87,18 +87,18 @@
    }
 
    return self
- }(fileSystem))
+ }(fileSystem,window))
 
 
-// API => Examples
+// DOC => Examples
 
 // fileSystem.save("hello_world.txt",new Blob(["Hello World"],{type:"text/plain"}))
 // fileSystem.list(function(repositories){
 //   console.log(repositories)
 // })
-// // Find
+// Find
 // fileSystem.find_by_name("08-12-2015_17-29-20_desktop.webm",function(f){
-//   console.log(f)
+//   console.log(f.root)
 // })
 //
 // // Destroy
