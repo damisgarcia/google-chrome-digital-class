@@ -1,0 +1,7 @@
+<h1 class="text-center">Edit File</h1>
+<form name="repositoryUpload" ng-submit="repository.update()" ng-init=" repository.filename = repositories.select_file.$name;">
+  <div class="form-group">
+    <input type="text" ng-model="repository.filename" class="form-control">
+  </div>
+  <button type="submit" class="btn btn-large btn-danger btn-block" ng-disabled="repository.disabled"><big>Update</big></button>
+</form>

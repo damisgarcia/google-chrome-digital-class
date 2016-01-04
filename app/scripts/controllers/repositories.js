@@ -31,6 +31,16 @@ angular.module('digitalclassApp')
       })
     }
 
+    self.openEdit = function(index){
+      $state.go("repositories.edit")
+      self.select_file = self.files[index]
+      ngDialog.open({
+        template: 'app/views/repositories-edit.html',
+        controller:"RepositoriesEditCtrl as repository",
+        scope: $scope
+      })
+    }
+
     self.destroy = function(index){
       if(confirm("Really delete this file"))
       background.postMessage({action:"repositories destroy", filename: self.files[index].$name})
@@ -40,7 +50,7 @@ angular.module('digitalclassApp')
     function filterFileByWebm(files){
       var a = []
       angular.forEach(files, function(file,index){
-        if(file.$name.match(/\.webm$/)){
+        if(!file.$name.match(/\.[\w\d]+$/)){
           a.push(file)
         }
       })

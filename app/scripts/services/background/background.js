@@ -4,36 +4,10 @@ var RELOAD_WAIT = 3000
 
 // Comunication with NACL modules
 function moduleDidLoad() {
-  // fileSystem.find_by_name("screen-camera.webm",function(f){
-  //   var xhr = new XMLHttpRequest();
-  //   var video = document.getElementById('file_test')
-  //   var blobVideo = new Blob();
-  //   xhr.open('GET', 'filesystem:chrome-extension://aiikidlhbncdaccodnmdffbgoepgaock/persistent/screen-camera.webm', true);
-  //   xhr.responseType = 'blob';
-  //   xhr.send()
-  //   // filesystem:chrome-extension://aiikidlhbncdaccodnmdffbgoepgaock/persistent/screen-camera.webm
-  //   // inject an image with the src url
-  //   xhr.onload = function(e) {
-  //     if (this.status == 200) {
-  //       callback(this.response);
-  //     }
-  //   };
-  //   // xhr.onreadystatechange = function (oEvent) {
-  //   //   var arrayBuffer = this.response;
-  //   //
-  //   //   if (this.readyState>3) {
-  //   //      var byteArray = new Uint8Array(arrayBuffer);
-  //   //      blobVideo = new Blob([byteArray], { type: "text" });
-  //   //      console.log(blobVideo)
-  //   //      var videoUrl = window.URL.createObjectURL(blobVideo);
-  //   //      video.src = videoUrl;
-  //   //   }
-  //   // }
-  // })
-
   // The module is not hidden by default so we can easily see if the plugin
   // failed to load.
-  var $desktop, $camera, $desktopInRecorder
+
+  var $mediaStreams, $desktopInRecorder
   chrome.runtime.onConnect.addListener(function(port) {
     port.onMessage.addListener(function(res){
       if(res.action == "status"){
@@ -65,11 +39,11 @@ function moduleDidLoad() {
           }
 
           function onstop(){
-            callRepositoryWindow(filename + ".webm")
+            checkout(filename)
           }
 
           var response = Encoder.start(stream,null,options,onstop)
-          port.postMessage({action:"desktop request stream",stream: response.src, status: DigitalClass.situation})
+          port.postMessage({action:"desktop request stream",stream: response, status: DigitalClass.situation})
         })
       }
 
@@ -85,10 +59,10 @@ function moduleDidLoad() {
           }
 
           function onstop(){
-            callRepositoryWindow(filename + ".webm")
+            checkout(filename)
           }
 
-          var response = Encoder.start(stream,options,onstop)
+          var response = Encoder.start(stream,null,options,onstop)
           port.postMessage({ action:"webcam request stream",stream: response, status: DigitalClass.situation })
         })
       }
@@ -101,44 +75,36 @@ function moduleDidLoad() {
             DigitalClass.camStream = stream
 
             var options = {
-              width: 640,
-              height: 480
+              filename: filename,
+              width: window.screen.width,
+              height: window.screen.height,
             }
 
             function onstop(){
-              callRepositoryWindow(filename + ".webm")
+              checkout(filename)
             }
 
-            $camera = Encoder.start(stream,options,onstop)
-            port.postMessage({ action:"webcam request stream", stream: $camera.src, status: DigitalClass.situation })
+            var response = Encoder.start(DigitalClass.desktopStream, DigitalClass.camStream, options, onstop)
+            port.postMessage({action:"webcam request stream", stream: response, status: DigitalClass.situation})
           })
 
-          var options = {
-            filename: filename,
-            width: window.screen.width,
-            height: window.screen.height,
-            saveDisk: true
-          }
-
-          $desktop = Encoder.start(stream,options,null)
           // Set Primary View
           $desktopInRecorder = true
-          port.postMessage({action:"desktop request stream",stream: $desktop.src, status: DigitalClass.situation})
         })
       }
       else if (res.action == "focus desktop") {
-        if($desktop) Encoder.updateTrack($desktop.video)
+        Encoder.updateTrack("desktop")
         $desktopInRecorder = true
       }
 
       else if (res.action == "focus webcam") {
-        if($camera) Encoder.updateTrack($camera.video)
+        Encoder.updateTrack("webcam")
         $desktopInRecorder = false
       }
       // Repositories Routes
       else if(res.action == "repositories list"){
         fileSystem.list(function(repositories){
-          port.postMessage({action:"repositories list",files: repositories})
+          port.postMessage({action:"repositories list",files: repositories.reverse()})
         })
       }
 
@@ -149,34 +115,57 @@ function moduleDidLoad() {
       }
 
       else if(res.action == "repositories show media-group"){
-        var video, audio
-        fileSystem.find_by_name(res.filename + ".webm",function(f){
-          video = f
-          fileSystem.find_by_name(res.filename + ".wav",function(f){
-            audio = f
-            port.postMessage({action:"repositories show media-group",video: video, audio: audio})
-          })
+        fileSystem.open(res.target,function(result){
+          port.postMessage({action:"repositories show media-group",media_group: result})
         })
       }
 
       else if(res.action == "repositories destroy"){
-        fileSystem.find_by_name(res.filename,function(f){
-          fileSystem.destroy(f,function(){
-            fileSystem.list(function(repositories){
-              port.postMessage({action:"repositories list",files: repositories})
-            })
+        fileSystem.rmdir(res.target,function(f){
+          fileSystem.list(function(repositories){
+            port.postMessage({action:"repositories list",files: repositories})
           })
-        })
+        })        
       }
     })
   })
 }
 
+function checkout(filename){
+  var formats = [".webm",".wav"]
+  var files = []
+  var redirect = filename + "/" + filename + ".webm"
 
+  formats.forEach(function(format){
+    fileSystem.find_by_name(filename + format, function(f){
+      files.push(f)
+    })
+  })
+  moveCaptures(filename, files)
+  callRepositoryWindow(redirect)
+}
 
 function callRepositoryWindow(filename){
   setTimeout( function(){
     chrome.tabs.create({url:"/index.html#/repositories/"+filename}, null)
-    // setTimeout(Encoder.reload,RELOAD_WAIT*2)
   }, RELOAD_WAIT)
 }
+
+function moveCaptures(dirname,array_files){
+  fileSystem.mkdir(dirname,function(DataFolder){
+    array_files.forEach(function(file){
+      file.moveTo(DataFolder)
+    })
+  })
+}
+
+
+/**
+ * Add the default "load" and "message" event listeners to the element with
+ * id "listener".
+ *
+ * The "load" event is sent when the module is successfully loaded. The
+ * "message" event is sent when the naclModule posts a message using
+ * PPB_Messaging.PostMessage() (in C) or pp::Instance().PostMessage() (in
+ * C++).
+ */

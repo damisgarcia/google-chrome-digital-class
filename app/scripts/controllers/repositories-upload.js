@@ -9,43 +9,53 @@
  */
 angular.module('digitalclassApp')
   .controller('RepositoriesUploadCtrl', function ($scope,$cookieStore,$timeout) {
+    var background = chrome.runtime.connect({name:"background repositories upload"})
     var self = this
     self.profile = $cookieStore.get('profile')
 
     self.upload = function(){
-      var options = {
-        name: self.filename,
-        lesson_id: self.lesson,
-        type: "video",
-        tags: self.tags,
-        privilege: self.privilege,
-        token: self.profile.credentials.access_token
-      }
-
-      self.disabled = true
-
-      worker.postMessage({
-        command: 'start',
-        filePath: "filesystem:chrome-extension://aiikidlhbncdaccodnmdffbgoepgaock/persistent/screen-camera.webm",
-        options: options
-      })
-
-      worker.postMessage({
-        command: 'situation'
-      })
-
-      $timeout(function(){
-        worker.postMessage({
-          command: 'situation'
-        })
-      },200)
+      self.filename = self.filename.match(/(.*)\.[^.]+$/)[1]
+      background.postMessage({action:"repositories show media-group",filename:self.filename})
     }
+
 
     var worker = new window.Worker("/app/scripts/services/lib/UploadWorker.js")
 
     worker.onmessage = function(event){
-      if(event.data.status == 201){
-        self.disabled = false
+      switch(event.data.status){
+        case 201:
+          self.disabled = false
+          console.log("Done")
+          $scope.$apply()
+          break
+        case 303:
+          console.log("Processing:",event.data)
+          break
+        default:
+          console.log(event.data)
       }
     }
+
+    background.onMessage.addListener(function(res){
+      var queue = [res.video, res.audio]
+
+      self.disabled = true
+
+      angular.forEach(queue,function(ele){
+        var options = {
+          name: ele.$name,
+          lesson_id: self.lesson,
+          type: ele.type,
+          tags: self.tags || "",
+          privilege: self.privacy,
+          token: self.profile.credentials.access_token
+        }
+
+        worker.postMessage({
+          command: 'start',
+          filePath: ele.extensionPath,
+          options: options
+        })
+      })
+    })
   });

@@ -24,14 +24,13 @@ angular.module('digitalclassApp')
         $scope.busy = BUSY
       }
 
-      if(res.action == "desktop request stream"){
+      if(res.stream){
         var preview = document.getElementById('preview')
-        preview.src = res.stream
-      }
-      else if(res.action == "webcam request stream"){
         var webcam = document.getElementById('webcam')
-        webcam.src = res.stream
+        preview.src = res.stream.main.src
+        webcam.src = res.stream.bg.src
       }
+
       else if(res.action == "take stream records"){
         var webcam = document.getElementById('webcam')
         var preview = document.getElementById('preview')
@@ -53,7 +52,7 @@ angular.module('digitalclassApp')
 
     this.stop = function($event){
       $event.preventDefault()
-      if(BUSY){ // if false
+      if(BUSY){
         background.postMessage({action:"stop records"})
       }
     }

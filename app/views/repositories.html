@@ -2,9 +2,10 @@
   <div class="row" ng-repeat="file in repositories.files">
       <div class="col-xs-12">
         <div class="thumbnail">
-          <a ui-sref="repositories.show({fileName:file.$name})">{{file.$name}}</a>
-          <button class="btn btn-xs btn-danger margin-right pull-right" ng-click="repositories.destroy($index)">Destroy</button>
-          <button class="btn btn-xs btn-success margin-right pull-right" ng-disabled="!repositories.profile" ng-click="repositories.openUpload($index)">Upload</button>
+          <a ui-sref="repositories.show({filePath:file.$name})">{{file.$name}}</a>
+          <button class="btn btn-xs btn-danger margin-right pull-right"  ng-click="repositories.destroy($index)">Destroy</button>
+          <button class="btn btn-xs btn-success margin-right pull-right" ng-click="repositories.openUpload($index)" ng-disabled="!repositories.profile">Upload</button>
+          <button class="btn btn-xs btn-warning margin-right pull-right" ng-click="repositories.openEdit($index)">Editar</button>
         </div>
       </div>
   </div>

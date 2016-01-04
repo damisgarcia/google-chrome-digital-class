@@ -16,14 +16,14 @@ var Uploader = (function(){
   }
 
   self.readFile = function(url, callback) {
-    var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest()
     xhr.open('GET', url, true)
     xhr.responseType = 'blob'
 
     xhr.onload = function(e) {
-      if (this.status == 200) {
-        self.situation = self.status.DONE
+      if(this.status === self.status.SUCCESS) {
         callback(this.response)
+        self.situation = self.status.DONE
       }
     }
 
@@ -35,13 +35,17 @@ var Uploader = (function(){
     self.situation = self.status.INCOMPLETE
     // Build Form
     var formData = new FormData();
-    formData.append('file', blobToFile(options.name, options.file))
+    var file = blobToFile(options.name, options.file)
+    formData.append('file', file)
+    formData.append('filename', options.name)
     formData.append('tag_list', options.tags)
-    formData.append('type', options.privilege)
+    formData.append('type', options.type)
+    formData.append('privacy', options.privacy)
     formData.append('access_token', options.token)
 
     var path = SERVER + API + "/repositories/lesson/"+options.lesson_id+"/media/"+options.type+"/chrome_extension"
     var xhr = new XMLHttpRequest()
+
     xhr.open('POST', path, true)
 
     xhr.onload = function(e) {
@@ -54,7 +58,7 @@ var Uploader = (function(){
 
   function blobToFile(fileName, blob){
     blob.lastModifiedDate = new Date()
-    blob.name = fileName
+    blob.filename = fileName
     return blob
   }
 

@@ -109,7 +109,7 @@ angular.module('digitalclassApp',
 
     .state('repositories.show', {
       parent:'repositories',
-      url: "/:fileName",
+      url: "/:filePath",
       views:{
         "main@":{
           templateUrl: "app/views/repositories-show.html",
@@ -124,13 +124,27 @@ angular.module('digitalclassApp',
       controller: "RepositoriesUploadCtrl as repository"
     })
 
+    .state('repositories.edit', {
+      parent:'repositories',
+      templateUrl: "app/views/repositories-edit.html",
+      controller: "RepositoriesEditCtrl as repository"
+    })
+
 })
 
-.run(function($rootScope,$cookieStore,$state){
+.run(function($rootScope,$cookieStore,$state,Profile){
   var blacklist = ["repositories","configure","repositories.show"]
 
   $rootScope.$on('$stateChangeStart',function(event, toState, toParams, fromState, fromParams){
-    console.log($cookieStore.get('profile'))
+    var profile = $cookieStore.get('profile')
+    if(profile){
+      var credentials = profile.credentials
+      Profile.getProfile(profile.credentials,function(data){
+        profile = data
+        profile.credentials = credentials
+        $cookieStore.put('profile', profile)
+      })
+    }
   })
 
   $rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
