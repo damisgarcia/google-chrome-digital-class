@@ -77,8 +77,6 @@ private:
 //	std::deque< mkvmuxer::Frame* > video_queue;
 
 
-	/**Número da trilha de áudio criada por pSegment.*/
-	int audio_track_num;
 	/**Número da trilha de vídeo criada por pSegment.*/
 	int video_track_num;
 
@@ -86,10 +84,6 @@ private:
 	int video_width;
 	/**Altura do vídeo a ser salvo*/
 	int video_height;
-	/**Taxa de captura do áudio a ser salvo(classe não salva áudio atualmente)*/
-	int audio_sample_rate;
-	/**Quantidade de canais do áudio a ser salvo(classe não salva áudio atualmente)*/
-	int audio_channels;
 
 	/**Flag indicando se o muxer já foi inicializado*/
 	bool initialized;

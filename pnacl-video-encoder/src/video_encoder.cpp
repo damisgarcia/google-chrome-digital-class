@@ -39,8 +39,8 @@
 #define NS_EXP 1000000000; //10^9
 
 #define FS_PATH "/persistent/"
-
-#define KEY_FRAME_RATIO 20
+//2 keyframe/s.
+#define KEY_FRAME_RATIO 15
 
 static bool probed_encoder = false;
 
@@ -165,7 +165,8 @@ void VideoEncoder::ScheduleNextEncode() {
 		return;
 
 	PP_Time now = pp::Module::Get()->core()->GetTime();
-	PP_Time tick = 1.0 / 30;
+	//framerate hard-coded para 30fps
+	PP_Time tick = 1.0 / 30.0;
 
 	PP_Time delta = tick
 			- std::max(std::min(now - last_tick - tick, tick), 0.0);
