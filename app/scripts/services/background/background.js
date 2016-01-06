@@ -1,6 +1,10 @@
 'use strict'
 
 var RELOAD_WAIT = 3000
+var PNG_REGEX =   /\.png$/
+var WEBM_REGEX =  /\.webm$/
+var WAV_REGEX =   /\.wav$/
+
 
 // Comunication with NACL modules
 function moduleDidLoad() {
@@ -114,27 +118,45 @@ function moduleDidLoad() {
         })
       }
 
+      else if(res.action == "repositories edit"){
+        fileSystem.mvdir(res.past_name,res.new_name,function(repository){
+          fileSystem.$list(repository,function(result){
+            port.postMessage({action:"repositories list",files: result.reverse()})
+          })
+        })
+      }
+
       else if(res.action == "repositories show media-group"){
         fileSystem.open(res.target,function(result){
           port.postMessage({action:"repositories show media-group",media_group: result})
         })
       }
 
+
       else if(res.action == "repositories destroy"){
-        fileSystem.rmdir(res.target,function(f){
-          fileSystem.list(function(repositories){
-            port.postMessage({action:"repositories list",files: repositories})
+        var is_file_regex = /[\.[\d\w]$/
+        if(is_file_regex.test(res.target)){
+          fileSystem.find_by_name(res.target,function(f){
+            fileSystem.destroy(f,function(){
+              console.log("File Destroy")
+            })
           })
-        })        
+        } else{
+          fileSystem.rmdir(res.target,function(f){
+            fileSystem.list(function(repositories){
+              port.postMessage({action:"repositories list",files: repositories.reverse()})
+            })
+          })
+        }
       }
     })
   })
 }
 
 function checkout(filename){
-  var formats = [".webm",".wav"]
+  var formats = [".webm",".wav",".png"]
   var files = []
-  var redirect = filename + "/" + filename + ".webm"
+  var redirect = filename
 
   formats.forEach(function(format){
     fileSystem.find_by_name(filename + format, function(f){
@@ -154,7 +176,18 @@ function callRepositoryWindow(filename){
 function moveCaptures(dirname,array_files){
   fileSystem.mkdir(dirname,function(DataFolder){
     array_files.forEach(function(file){
-      file.moveTo(DataFolder)
+      if(PNG_REGEX.test(file.$name)){
+        file.moveTo(DataFolder,"poster.png")
+      }
+      else if(WEBM_REGEX.test(file.$name)){
+        file.moveTo(DataFolder,"video.webm")
+      }
+      else if(WAV_REGEX.test(file.$name)){
+        file.moveTo(DataFolder,"audio.wav")
+      }
+      else{
+        file.moveTo(DataFolder)
+      }
     })
   })
 }

@@ -29,6 +29,17 @@ var Encoder = (function(){
     main.track = m_track
     main.play()
 
+    main.onplay = function(){
+      var max = 3000
+      var min = 1000
+      var timeoutTakeAPhoto = Math.random() * (max - min) + min
+      setTimeout(
+        function(){
+          var framename = options.filename+".png"
+          self.saveFrame(main,framename)
+        },timeoutTakeAPhoto)
+    }
+
     main.track.onended = function(){
       self.stop(onStop)
       main = false
@@ -79,7 +90,7 @@ var Encoder = (function(){
     if(DigitalClass.situation != DigitalClass.status.paused){
       Microphone.stopRecordingProcess(function(blob){
         fileSystem.save(Microphone.filename, blob, callback)
-        DigitalClass.situation = DigitalClass.status.done        
+        DigitalClass.situation = DigitalClass.status.done
       })
       self.stopRecords()
     }
@@ -116,17 +127,24 @@ var Encoder = (function(){
     });
   }
 
-  // self.saveFrame = function(filename){
-  //   var canvas = document.createElement("canvas")
-  //   canvas.width = self.main.width
-  //   canvas.height = self.element.height
-  //   var ctx = canvas.getContext("2d")
-  //   ctx.drawImage(self.element,0,0)
-  //   var base64 = canvas.toDataURL("image/png",0.1)
-  //   console.log(base64)
-  //   var blob = new Blob([base64],{type:"image/png"})
-  //   fileSystem.save(filename+".png",blob)
-  // }
+  self.getFrame = function(element){
+    var canvas = document.createElement("canvas")
+    canvas.width = element.width
+    canvas.height = element.height
+
+    var ctx = canvas.getContext("2d")
+    ctx.drawImage(element,0,0)
+
+    var base64 = canvas.toDataURL("image/png",0.1).replace("data:image/png;base64,","")
+    var blob = StreamHelper.b64toBlob(base64,"image/png")
+
+    return blob
+  }
+
+  self.saveFrame = function(video,filename){
+    var frame = self.getFrame(video)
+    fileSystem.save(filename,frame)
+  }
 
   self.reload = function(){
     window.location.reload()
