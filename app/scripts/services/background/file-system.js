@@ -20,19 +20,11 @@
 
    self.basename = "filesystem:" + location.origin + "/persistent"
 
-
+   //  File Api
    self.list = function(callback){
      navigator.webkitPersistentStorage.requestQuota(self.$1GB, function() {
        window.webkitRequestFileSystem(window.PERSISTENT , self.$1GB, function(persistent){
          self.$list(persistent,callback)
-       })
-     })
-   }
-
-   self.open = function(dirname,callback){
-     navigator.webkitPersistentStorage.requestQuota(self.$1GB, function() {
-       window.webkitRequestFileSystem(window.PERSISTENT , self.$1GB, function(persistent){
-         self.$open(persistent,dirname,callback)
        })
      })
    }
@@ -59,24 +51,7 @@
      file.remove(callback,self.$errorHandler)
    }
 
-   self.mkdir = function(dirname,callback){
-     navigator.webkitPersistentStorage.requestQuota(self.$1GB, function() {
-       window.webkitRequestFileSystem(window.PERSISTENT , self.$1GB, function(persistent){
-         self.$mkdir(persistent,dirname,callback)
-       })
-     })
-   }
-
-   self.rmdir = function(dirname,callback){
-     navigator.webkitPersistentStorage.requestQuota(self.$1GB, function() {
-       window.webkitRequestFileSystem(window.PERSISTENT , self.$1GB, function(persistent){
-         self.$rmdir(persistent,dirname,callback)
-       })
-     })
-   }
-
-
-   //  private
+   //  private file
    self.$find_by_name = function(repository,filename,callback){
      repository.root.getFile(filename, {create: false}, function(DatFile) {
        self.$appendPublicAttributesToFile(DatFile)
@@ -93,26 +68,71 @@
      })
    }
 
+  //  Directories API
 
-   self.$mkdir = function(repository,dirname,callback){
-     repository.root.getDirectory(dirname, { create: true }, callback)
-   }
+  self.open = function(dirname,callback){
+    navigator.webkitPersistentStorage.requestQuota(self.$1GB, function() {
+      window.webkitRequestFileSystem(window.PERSISTENT , self.$1GB, function(persistent){
+        self.$open(persistent,dirname,callback)
+      })
+    })
+  }
 
-   self.$rmdir = function(repository,dirname,callback){
-     if(!callback) throw "Error: Not found return function"
-     repository.root.getDirectory(dirname, { create: false }, function(repository){
-       repository.removeRecursively(callback,function(error){
-         console.error(error)
+   self.mkdir = function(dirname,callback){
+     navigator.webkitPersistentStorage.requestQuota(self.$1GB, function() {
+       window.webkitRequestFileSystem(window.PERSISTENT , self.$1GB, function(persistent){
+         self.$mkdir(persistent,dirname,callback)
        })
      })
    }
 
-   // explorer Directory
-   self.$open = function(repository,dirname,callback){
-     repository.root.getDirectory(dirname, { create: false }, function(repository){
-       self.$list(repository,callback)
+   self.mvdir = function(dirname,newDirName,callback){
+     if(!callback) throw "Error: Not found return function"
+     navigator.webkitPersistentStorage.requestQuota(self.$1GB, function() {
+       window.webkitRequestFileSystem(window.PERSISTENT , self.$1GB, function(persistent){
+         self.$mvdir(persistent,dirname,newDirName,callback)
+       })
      })
    }
+
+   self.rmdir = function(dirname,callback){
+     navigator.webkitPersistentStorage.requestQuota(self.$1GB, function() {
+       window.webkitRequestFileSystem(window.PERSISTENT , self.$1GB, function(persistent){
+         self.$rmdir(persistent,dirname,callback)
+       })
+     })
+   }
+
+  //  private directories
+
+  self.$mkdir = function(repository,dirname,callback){
+    repository.root.getDirectory(dirname, { create: true }, callback)
+  }
+
+  self.$rmdir = function(repository,dirname,callback){
+    if(!callback) throw "Error: Not found return function"
+    repository.root.getDirectory(dirname, { create: false }, function(repository){
+      repository.removeRecursively(callback,function(error){
+        console.error(error)
+      })
+    })
+  }
+
+  self.$mvdir = function(repository,dirname,newDirName,callback){
+    repository.root.getDirectory(dirname, { create: false }, function(dir){
+      dir.moveTo(repository.root,newDirName,callback,function(error){
+        console.error(error)
+      })
+    })
+  }
+
+  self.$open = function(repository,dirname,callback){
+    repository.root.getDirectory(dirname, { create: false }, function(repository){
+      self.$list(repository,callback)
+    })
+  }
+
+   //  Common Methods
 
    // List all archives from root
    self.$list = function(repository,callback){
@@ -162,7 +182,7 @@
 // fileSystem.save("hello_world.txt",new Blob(["Hello World"],{type:"text/plain"}))
 // fileSystem.mkdir("november_rain/",function(repositories){
 //   console.log("Created")
-// }) 
+// })
 // fileSystem.rmdir("november_rain/",function(repositories){
 //   console.log("Destroy")
 // })

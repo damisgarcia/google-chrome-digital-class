@@ -8,18 +8,12 @@
  * Controller of the digitalclassApp
  */
 angular.module('digitalclassApp')
-  .controller('RepositoriesCtrl', function ($scope,$cookieStore,$state,ngDialog) {
+  .controller('RepositoriesCtrl', function ($scope,$rootScope,$cookieStore,$sce,$state,ngDialog) {
     var self = this
     var background = chrome.runtime.connect({name:"background repositories"})
 
     this.profile = $cookieStore.get('profile')
-
-    background.onMessage.addListener(function(res){
-      if(res.action == "repositories list"){
-        self.files = filterFileByWebm(res.files)
-      }
-      $scope.$apply()
-    })
+    this.selection = []
 
     self.openUpload = function(index){
       $state.go("repositories.upload")
@@ -42,20 +36,57 @@ angular.module('digitalclassApp')
     }
 
     self.destroy = function(index){
-      if(confirm("Really delete this file"))
-      background.postMessage({action:"repositories destroy", filename: self.files[index].$name})
+      if(confirm("Really delete this file?"))
+      background.postMessage({action:"repositories destroy", target: self.files[index].$name})
     }
 
-    // Find for file in repository with .Webm extension
-    function filterFileByWebm(files){
-      var a = []
-      angular.forEach(files, function(file,index){
-        if(!file.$name.match(/\.[\w\d]+$/)){
-          a.push(file)
-        }
+    self.destroy_all = function(){
+      if(confirm("Really delete this files?"))
+      angular.forEach(self.selection,function(file,index){
+        background.postMessage({action:"repositories destroy", target: file.$name})
       })
-      return a
+      self.selection = []
     }
+
+    $scope.toggleSelection = function(repository) {
+      var id = self.selection.indexOf(repository)
+
+      if (id > -1) {
+        self.selection.splice(id, 1)
+        repository.checked = false
+      }
+
+      else {
+        self.selection.push(repository)
+        repository.checked = true
+      }
+    }
+
+    $scope.selectAll = function(){
+      self.selection.length == 0 ? self.selection = self.files : self.selection = []
+
+      angular.forEach(self.files,function(file,index){
+        self.selection.length == 0 ? file.checked = false : file.checked = true
+      })
+    }
+
+    $scope.trustImage = function(file){
+      var url = file.extensionPath + "/poster.png"
+      var html = "<img src='"+url+"' width='50'/>"
+      return $sce.trustAsHtml(html)
+    }
+
+    background.onMessage.addListener(function(res){
+      if(res.action == "repositories list"){
+        self.files = res.files
+      }
+      $scope.$apply()
+    })
 
     background.postMessage({action:"repositories list"})
+
+    // NgEvents
+    $rootScope.$on('ngDialog.closed', function (e, $dialog) {
+      background.postMessage({action:"repositories list"})
+    })
   });

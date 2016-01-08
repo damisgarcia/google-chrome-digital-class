@@ -49,3 +49,53 @@ body{
 .margin-lg-right{
   margin-right: 2.4rem !important;
 }
+
+/*FLEX BOX HELPER*/
+
+.flex{
+  display: flex;
+  width: 100%;
+}
+
+.flex-row{
+  flex-direction: row;
+}
+
+.flex-column{
+  flex-direction: column;
+}
+
+.flex-center-center{
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-center-start{
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.flex-center-end{
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.flex-start-center{
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.flex-end-center{
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.flex-start-end{
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.flex-end-start{
+  align-items: flex-end;
+  justify-content: flex-start;
+}
