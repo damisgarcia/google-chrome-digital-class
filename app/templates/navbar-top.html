@@ -29,6 +29,10 @@
             Repository
           </a>
         </li>
+        <li class="divider" ng-show="$profile"></li>
+        <li ng-show="$profile">
+          <a ui-sref="profile({logout:true})">Encerra Sessão</a>
+        </li>
       </ul>
     </span>
     <a class="navbar-brand" href="#"><h4>digitalclassApp</h4></a>

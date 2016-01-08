@@ -8,16 +8,15 @@
  * Controller of the digitalclassApp
  */
 angular.module('digitalclassApp')
-  .controller('RepositoriesUploadCtrl', function ($scope,$cookieStore,$timeout) {
+  .controller('RepositoriesUploadCtrl', function ($scope,$timeout,Profile) {
     var background = chrome.runtime.connect({name:"background repositories upload"})
     var self = this
-    self.profile = $cookieStore.get('profile')
+
+    self.profile = Profile.instance
 
     self.upload = function(){
-      self.filename = self.filename.match(/(.*)\.[^.]+$/)[1]
       background.postMessage({action:"repositories show media-group",filename:self.filename})
     }
-
 
     var worker = new window.Worker("/app/scripts/services/lib/UploadWorker.js")
 

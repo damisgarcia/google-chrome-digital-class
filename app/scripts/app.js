@@ -5,6 +5,7 @@
  * @name digitalclassApp.canvasEncoder*
  */
 
+
 window.BUSY = false
 
 var background = chrome.runtime.connect({name:"background app"})
@@ -34,6 +35,10 @@ angular.module('digitalclassApp',
           templateUrl: "app/views/home.html",
           controller: "HomeCtrl as home"
         }
+      },
+      data:{
+        redirectIfAuthorized: true,
+        redirect: "profile"
       }
     })
 
@@ -48,12 +53,16 @@ angular.module('digitalclassApp',
     })
 
     .state('profile', {
-      url: "/profile",
+      url: "/profile?logout",
       views:{
         "main":{
           templateUrl: "app/views/profile.html",
           controller: "ProfileCtrl as profile"
         }
+      },
+      data:{
+        requiredAuthorization: true,
+        redirect: "home"
       }
     })
 
@@ -121,7 +130,11 @@ angular.module('digitalclassApp',
     .state('repositories.upload', {
       parent:'repositories',
       templateUrl: "app/views/repositories-upload.html",
-      controller: "RepositoriesUploadCtrl as repository"
+      controller: "RepositoriesUploadCtrl as repository",
+      data:{
+        requiredAuthorization: true,
+        redirect: "login"
+      }
     })
 
     .state('repositories.edit', {
@@ -132,25 +145,29 @@ angular.module('digitalclassApp',
 
 })
 
-.run(function($rootScope,$cookieStore,$state,Profile){
+.run(function($rootScope,$state,$timeout,Auth){
   var blacklist = ["repositories","configure","repositories.show"]
 
+  /* Cookies Settings */
+  $.cookie.json = true
+
   $rootScope.$on('$stateChangeStart',function(event, toState, toParams, fromState, fromParams){
-    var profile = $cookieStore.get('profile')
-    if(profile){
-      var credentials = profile.credentials
-      Profile.getProfile(profile.credentials,function(data){
-        profile = data
-        profile.credentials = credentials
-        $cookieStore.put('profile', profile)
-      })
+    var isAuthorized = Auth.isAuthorized()
+
+    if("data" in toState){
+      if("redirectIfAuthorized" in toState.data){
+        if(toState.data.redirectIfAuthorized && isAuthorized){
+          event.preventDefault() // important!
+          $state.go(toState.data.redirect)
+        }
+      }
     }
   })
 
   $rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
     if(!fromState.name && !blacklist.includes(toState.name)){
-      if($cookieStore.get('state')){
-        var currentState = $cookieStore.get('state')
+      if($.cookie('state')){
+        var currentState = $.cookie('state')
         $state.go(currentState)
       }
     }

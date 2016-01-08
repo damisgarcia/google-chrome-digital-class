@@ -134,20 +134,11 @@ function moduleDidLoad() {
 
 
       else if(res.action == "repositories destroy"){
-        var is_file_regex = /[\.[\d\w]$/
-        if(is_file_regex.test(res.target)){
-          fileSystem.find_by_name(res.target,function(f){
-            fileSystem.destroy(f,function(){
-              console.log("File Destroy")
-            })
+        fileSystem.rmdir(res.target,function(f){
+          fileSystem.list(function(repositories){
+            port.postMessage({action:"repositories list",files: repositories.reverse()})
           })
-        } else{
-          fileSystem.rmdir(res.target,function(f){
-            fileSystem.list(function(repositories){
-              port.postMessage({action:"repositories list",files: repositories.reverse()})
-            })
-          })
-        }
+        })
       }
     })
   })

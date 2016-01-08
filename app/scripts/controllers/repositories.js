@@ -8,11 +8,11 @@
  * Controller of the digitalclassApp
  */
 angular.module('digitalclassApp')
-  .controller('RepositoriesCtrl', function ($scope,$rootScope,$cookieStore,$sce,$state,ngDialog) {
+  .controller('RepositoriesCtrl', function ($scope,$rootScope,$sce,$state,ngDialog) {
     var self = this
     var background = chrome.runtime.connect({name:"background repositories"})
 
-    this.profile = $cookieStore.get('profile')
+    this.profile = Profile
     this.selection = []
 
     self.openUpload = function(index){
