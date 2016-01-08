@@ -64,15 +64,15 @@ public:
 	 * @param track_id - ID da track que foi passado para AddTrack()
 	 *
 	 **/
-	void SetTrack(int track_id);
+	void SetTrack(pp::Resource track_res);
 
-	void AddTrack(int track_id, pp::Resource track_res);
+//	void AddTrack(int track_id, pp::Resource track_res);
 
 	inline bool is_encoding(){return encoding;}
 	/**
 	 * Encerra o encode, fechando a track associada e criando o arquivo .webm do muxer associado.
 	 */
-	void StopEncode();
+	bool StopEncode();
 private:
 	/**
 	 * Faz a pré inicialização do encoder, verificando quais são os profiles de encoding disponíveis. Necessário para a inicialização do encoder.
