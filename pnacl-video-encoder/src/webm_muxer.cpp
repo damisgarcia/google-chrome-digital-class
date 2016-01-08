@@ -38,11 +38,11 @@ int WebmMuxer::Init(std::string file_name)
 	}
 	pSegment = new mkvmuxer::Segment();
 	pSegment->Init(&writer);
-	pSegment->set_mode(mkvmuxer::Segment::kFile);
-
+	pSegment->set_mode(mkvmuxer::Segment::kLive);
 
 	video_track_num = pSegment->AddVideoTrack(video_width, video_height, 1);
 
+	pSegment->OutputCues(true);
 	pSegment->CuesTrack(video_track_num);
 
 
@@ -99,7 +99,6 @@ bool WebmMuxer::Finish()
 	{
 		return true;
 	}
-
 	if (!pSegment->Finalize())
 	{
 		LogError(-99, "Erro ao finalizar o arquivo webm");

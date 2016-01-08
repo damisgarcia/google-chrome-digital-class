@@ -93,8 +93,7 @@ void VideoEncoder::SetTrack(pp::Resource track_res)
 	}
 
 	track = new VideoTrack(instance, track_res);
-	if (track != NULL)
-	{
+	if(encoding){
 		StartTrackFrames();
 	}
 	force_key_frame = true;
