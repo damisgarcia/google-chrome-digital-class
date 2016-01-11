@@ -37,7 +37,7 @@ var Uploader = (function(){
     var formData = new FormData();
     var file = blobToFile(options.name, options.file)
     formData.append('file', file)
-    formData.append('filename', options.name)
+    formData.append('filename', options.parent)
     formData.append('tag_list', options.tags)
     formData.append('type', options.type)
     formData.append('privacy', options.privacy)

@@ -128,7 +128,7 @@ function moduleDidLoad() {
 
       else if(res.action == "repositories show media-group"){
         fileSystem.open(res.target,function(result){
-          port.postMessage({action:"repositories show media-group",media_group: result})
+          port.postMessage({action:"repositories show media-group", media_group: result, parent: res.target})
         })
       }
 
@@ -139,6 +139,10 @@ function moduleDidLoad() {
             port.postMessage({action:"repositories list",files: repositories.reverse()})
           })
         })
+      }
+
+      else if(res.action == "repositories markfolder"){
+        fileSystem.save(res.target + "/synchronized.txt", new Blob(["Synchronized"],{type:"text/plain"}))
       }
     })
   })

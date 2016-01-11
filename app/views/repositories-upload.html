@@ -8,9 +8,8 @@
 <form name="repositoryUpload" ng-submit="repository.upload()"
       ng-init="repository.privacy=0;
               repository.filename = repositories.select_file.$name;
-              repository.filepath = repositories.select_file.extensionPath;">
+              repository.filepath = repositories.select_file.extensionPath;">  
   <input type="hidden" ng-model="repository.filename" required/>
-  <input type="hidden" ng-model="repository.filepath" required/>
   <div class="form-group">
     <h6>Privacy Level:</h6>
     <label>Private</label>
@@ -28,7 +27,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="lesson in repositories.profile.lessons">
+        <tr ng-repeat="lesson in repositories.profile.data.lessons">
           <td>
             <input class="margin-right" name="lesson" type="radio" ng-model="repository.lesson" ng-value="lesson.id" required/>
             <label>{{lesson.name}}</label>

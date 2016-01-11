@@ -23,6 +23,7 @@
     "bootstrap": "~3.3.6",
     "metro-bootstrap": "*",
     "Materialize": "materialize#~0.97.3",
-    "ng-tags-input": "~3.0.0"
+    "ng-tags-input": "~3.0.0",
+    "flexboxgrid": "~6.3.0"
   }
 }

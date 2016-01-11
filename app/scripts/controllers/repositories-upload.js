@@ -7,15 +7,22 @@
  * # RepositoriesUploadCtrl
  * Controller of the digitalclassApp
  */
+
+ var PNG_REGEX =   /\.png$/
+ var WEBM_REGEX =  /\.webm$/
+ var WAV_REGEX =   /\.wav$/
+
 angular.module('digitalclassApp')
-  .controller('RepositoriesUploadCtrl', function ($scope,$timeout,Profile) {
+  .controller('RepositoriesUploadCtrl', function ($scope,$timeout,ngDialog) {
     var background = chrome.runtime.connect({name:"background repositories upload"})
     var self = this
 
-    self.profile = Profile.instance
+    self.profile = Profile
+
+    self.target_folder = $scope.$parent.repositories.select_file.$name
 
     self.upload = function(){
-      background.postMessage({action:"repositories show media-group",filename:self.filename})
+      background.postMessage({action:"repositories show media-group",target:self.filename})
     }
 
     var worker = new window.Worker("/app/scripts/services/lib/UploadWorker.js")
@@ -25,6 +32,7 @@ angular.module('digitalclassApp')
         case 201:
           self.disabled = false
           console.log("Done")
+          background.postMessage({action:"repositories markfolder",target: self.target_folder})
           $scope.$apply()
           break
         case 303:
@@ -36,25 +44,38 @@ angular.module('digitalclassApp')
     }
 
     background.onMessage.addListener(function(res){
-      var queue = [res.video, res.audio]
-
+      var queue = res.media_group
       self.disabled = true
 
       angular.forEach(queue,function(ele){
+        var name = null
+
+        if(WEBM_REGEX.test(ele.$name)){
+          ele.type = "video"
+          name = res.parent + "/" + ele.$name
+        }
+
+        if(WAV_REGEX.test(ele.$name)){
+          ele.type = "audio"
+          name = res.parent + "/" + ele.$name
+        }
+
         var options = {
-          name: ele.$name,
+          name: name,
+          parent: res.parent,
           lesson_id: self.lesson,
           type: ele.type,
           tags: self.tags || "",
           privilege: self.privacy,
-          token: self.profile.credentials.access_token
+          token: self.profile.data.credentials.access_token
         }
-
-        worker.postMessage({
-          command: 'start',
-          filePath: ele.extensionPath,
-          options: options
-        })
+        if(ele.type){
+          worker.postMessage({
+            command: 'start',
+            filePath: ele.extensionPath,
+            options: options
+          })
+        }
       })
     })
   });
