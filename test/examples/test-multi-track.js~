@@ -15,7 +15,7 @@ function record(filename){
   common.naclModule.postMessage({
     command: 'start',
     file_name: filename,
-    video_track: [ videoBg.track, videoSm.track ],
+    video_track: videoBg.track,
     profile: 'vp8',
     width: videoBg.width,
     height: videoBg.height
@@ -61,22 +61,22 @@ function onFailMediaUser(error){
 window.$stop = function (e){
   e.preventDefault()
   common.naclModule.postMessage({command: "stop"})
-  //setTimeout(function (){
+  setTimeout(function (){
     //videoSm.getVideoTracks()[0].stop()
     //videoBg.getVideoTracks()[0].stop()
-  //},1000)
+  },1000)
 
 }
 
  window.$switch = function(e){
   e.preventDefault()
-  big ? big = false : big = true
+  big = !big
   if(big){
     videoBg.pause()
     videoSm.pause()
     common.naclModule.postMessage({
       command: 'change_track',
-      video_track: 1
+      video_track: videoBg.track
     });
     videoBg.play()
     videoSm.play()
@@ -85,7 +85,7 @@ window.$stop = function (e){
     videoSm.pause()
     common.naclModule.postMessage({
       command: 'change_track',
-      video_track: 0
+      video_track: videoSm.track
     });
     videoBg.play()
     videoSm.play()

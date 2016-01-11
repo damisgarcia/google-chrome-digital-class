@@ -2397,8 +2397,10 @@ bool Segment::CopyAndMoveCuesBeforeClusters(mkvparser::IMkvReader* reader,
 }
 
 bool Segment::Finalize() {
-  if (WriteFramesAll() < 0)
-    return false;
+  if (WriteFramesAll() < 0){
+	  return false;
+  }
+
 
   if (mode_ == kFile) {
     if (cluster_list_size_ > 0) {

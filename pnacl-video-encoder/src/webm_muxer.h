@@ -15,6 +15,7 @@
 #include <ppapi/utility/threading/simple_thread.h>
 
 #include "libwebm/mkvmuxer.hpp"
+
 #include "libwebm/mkvwriter.hpp"
 #include "tipos.h"
 
@@ -69,16 +70,10 @@ private:
 	 * Em caso de necessidade de maneiras diferentes de escrita, pode se implementar a interface IMkvWriter e usar o objeto criado para substituir este.*/
 	mkvmuxer::MkvWriter writer;
 	/**Último frame a ser salvo com sucesso*/
-	mkvmuxer::Frame last_frame;
+	uint64 last_frame_ts;
 	/**Número de frames que não foram salvos em um intervalo. Necessário para se congelar a imagem quando se perde muitos frames.*/
 	int delayed_frame_count;
 
-//	std::deque< mkvmuxer::Frame* > audio_queue;
-//	std::deque< mkvmuxer::Frame* > video_queue;
-
-
-	/**Número da trilha de áudio criada por pSegment.*/
-	int audio_track_num;
 	/**Número da trilha de vídeo criada por pSegment.*/
 	int video_track_num;
 
@@ -86,10 +81,6 @@ private:
 	int video_width;
 	/**Altura do vídeo a ser salvo*/
 	int video_height;
-	/**Taxa de captura do áudio a ser salvo(classe não salva áudio atualmente)*/
-	int audio_sample_rate;
-	/**Quantidade de canais do áudio a ser salvo(classe não salva áudio atualmente)*/
-	int audio_channels;
 
 	/**Flag indicando se o muxer já foi inicializado*/
 	bool initialized;

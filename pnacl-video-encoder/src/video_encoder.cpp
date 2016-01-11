@@ -1,7 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Modified by ...
+// Modified by Joaquim Neto ( https://github.com/Joaquimmnetto )
 
 #include "video_encoder.h"
 #include "video_encoder_instance.h"
@@ -39,29 +39,35 @@
 #define NS_EXP 1000000000; //10^9
 
 #define FS_PATH "/persistent/"
-
-#define KEY_FRAME_RATIO 20
+//2 keyframe/s.
+#define KEY_FRAME_RATIO 15
 
 static bool probed_encoder = false;
 
 VideoEncoder::VideoEncoder(pp::Instance* _instance, WebmMuxer& _muxer) :
-		instance(_instance), handle(instance), muxer(_muxer), track(NULL), new_track(NULL), video_profile(PP_VIDEOPROFILE_VP8_ANY), frame_format(
+		instance(_instance), handle(instance), muxer(_muxer), track(NULL), new_track(
+				NULL), video_profile(PP_VIDEOPROFILE_VP8_ANY), frame_format(
 				PP_VIDEOFRAME_FORMAT_I420), cb_factory(this), encoding(false), encode_ticking(
-				false), force_key_frame(false), last_key_frame(0), last_tick(0), last_ts(0), frame_count(0) {
+				false), force_key_frame(false), last_key_frame(0), last_tick(0), last_ts(
+				0), frame_count(0)
+{
 
-	if (!probed_encoder) {
+	if (!probed_encoder)
+	{
 		ProbeEncoder();
 	}
 
 }
 
-VideoEncoder::~VideoEncoder() {
+VideoEncoder::~VideoEncoder()
+{
 	delete_and_nulify(track);
 	tracks.clear();
 
 }
 void VideoEncoder::Encode(pp::Size _requested_size,
-		PP_VideoProfile _video_profile) {
+		PP_VideoProfile _video_profile)
+{
 
 	frame_size = _requested_size;
 	video_profile = _video_profile;
@@ -71,52 +77,83 @@ void VideoEncoder::Encode(pp::Size _requested_size,
 	StartEncoder();
 }
 
-void VideoEncoder::SetTrack(int track_id) {
+void VideoEncoder::SetTrack(pp::Resource track_res)
+{
 
-	if (tracks.find(track_id) != tracks.end()) {
-		if (track == NULL) {
-			track = tracks[track_id];
-		}
-		else {
-			new_track = tracks[track_id];
-		}
-
-	} else {
-		LogError(-99, "Track " << track_id << " não encontrada");
-		return;
-	}
-
-}
-
-void VideoEncoder::AddTrack(int track_id, pp::Resource track_res) {
-	if (encoding) {
-		LogError(-99,
-				"Adicione as trilhas antes do início da execução do encoder!");
-		return;
-	}
-
-	if (!pp::MediaStreamVideoTrack::IsMediaStreamVideoTrack(track_res)) {
+	if (!pp::MediaStreamVideoTrack::IsMediaStreamVideoTrack(track_res))
+	{
 		LogError(-99, "Track não é um recurso válido");
 		return;
 	}
 
-	if (tracks.find(track_id) == tracks.end()) {
-		tracks[track_id] = new VideoTrack(instance, track_res);
+	if (track != NULL)
+	{
+		StopTrackingFrames();
+		delete_and_nulify(track);
 	}
-}
 
-void VideoEncoder::ProbeEncoder() {
+	track = new VideoTrack(instance, track_res);
+	if(encoding){
+		StartTrackFrames();
+	}
+	force_key_frame = true;
+
+//	if (tracks.find(track_id) != tracks.end())
+//	{
+//		if (track == NULL)
+//		{
+//			track = tracks[track_id];
+//		}
+//		else
+//		{
+//			new_track = tracks[track_id];
+//		}
+//
+//	}
+//	else
+//	{
+//		LogError(-99, "Track " << track_id << " não encontrada");
+//		return;f
+//	}
+
+}
+//
+//void VideoEncoder::AddTrack(int track_id, pp::Resource track_res)
+//{
+//	if (encoding)
+//	{
+//		LogError(-99,
+//				"Adicione as trilhas antes do início da execução do encoder!");
+//		return;
+//	}
+//
+//	if (!pp::MediaStreamVideoTrack::IsMediaStreamVideoTrack(track_res))
+//	{
+//		LogError(-99, "Track não é um recurso válido");
+//		return;
+//	}
+//
+//	if (tracks.find(track_id) == tracks.end())
+//	{
+//		tracks[track_id] = new VideoTrack(instance, track_res);
+//	}
+//}
+
+void VideoEncoder::ProbeEncoder()
+{
 	encoder = pp::VideoEncoder(handle);
 	encoder.GetSupportedProfiles(
 			cb_factory.NewCallbackWithOutput(&VideoEncoder::OnEncoderProbed));
 }
 
 void VideoEncoder::OnEncoderProbed(int32 result,
-		const std::vector<PP_VideoProfileDescription> profiles) {
+		const std::vector<PP_VideoProfileDescription> profiles)
+{
 	probed_encoder = (result == PP_OK);
 }
 
-void VideoEncoder::StartEncoder() {
+void VideoEncoder::StartEncoder()
+{
 	encoder = pp::VideoEncoder(handle);
 	timestamps.clear();
 	Log("Inicializando Encoder");
@@ -126,27 +163,32 @@ void VideoEncoder::StartEncoder() {
 			2000000, PP_HARDWAREACCELERATION_WITHFALLBACK,
 			cb_factory.NewCallback(&VideoEncoder::OnInitializedEncoder));
 
-	if (error != PP_OK_COMPLETIONPENDING) {
+	if (error != PP_OK_COMPLETIONPENDING)
+	{
 		LogError(error, "Não foi possível inicializar encoder");
 		return;
 	}
 
 }
 
-void VideoEncoder::OnInitializedEncoder(int32 result) {
+void VideoEncoder::OnInitializedEncoder(int32 result)
+{
 	Log("Encoder Inicializado");
-	if (result != PP_OK) {
+	if (result != PP_OK)
+	{
 		LogError(result, "Falha na inicialização do encoder");
 		return;
 	}
 
 	pp::Size encoder_size;
-	if (encoder.GetFrameCodedSize(&encoder_size) != PP_OK) {
+	if (encoder.GetFrameCodedSize(&encoder_size) != PP_OK)
+	{
 		LogError(result,
 				"Não foi possível adquirir o tamanho do frame do encoder");
 		return;
 	}
-	if (!encoder_size.IsEmpty()) {
+	if (!encoder_size.IsEmpty())
+	{
 		frame_size = encoder_size;
 	}
 
@@ -159,21 +201,19 @@ void VideoEncoder::OnInitializedEncoder(int32 result) {
 
 }
 
-void VideoEncoder::ScheduleNextEncode() {
+void VideoEncoder::ScheduleNextEncode()
+{
 
 	if (encode_ticking)
 		return;
 
 	PP_Time now = pp::Module::Get()->core()->GetTime();
-	PP_Time tick = 1.0 / 30;
+
+	//framerate hard-coded para 30fps
+	PP_Time tick = 1.0 / 30.0;
 
 	PP_Time delta = tick
 			- std::max(std::min(now - last_tick - tick, tick), 0.0);
-
-	//Um key frame a cada segundo, o primeiro frame é um key frame
-//	force_key_frame = ((now - last_key_frame) > 1.0) || (last_key_frame == 0);
-
-
 
 	(static_cast<VideoEncoderInstance*>(instance))->encoderThread().message_loop().PostWork(
 			cb_factory.NewCallback(&VideoEncoder::GetEncoderFrameTick),
@@ -183,15 +223,13 @@ void VideoEncoder::ScheduleNextEncode() {
 	encode_ticking = true;
 }
 
-void VideoEncoder::GetEncoderFrameTick(int32 result) {
+void VideoEncoder::GetEncoderFrameTick(int32 result)
+{
 
-	if (encoding) {
-		if (new_track != NULL) {
-			track = new_track;
-			new_track = NULL;
-			force_key_frame = true;
-		}
-		if (receiving_frames && track && !track->current_frame.is_null()) {
+	if (encoding)
+	{
+		if (receiving_frames && track && !track->current_frame.is_null())
+		{
 			pp::VideoFrame frame = track->current_frame;
 			track->current_frame.detach();
 			GetEncoderFrame(frame);
@@ -202,40 +240,49 @@ void VideoEncoder::GetEncoderFrameTick(int32 result) {
 	}
 }
 
-void VideoEncoder::GetEncoderFrame(const pp::VideoFrame& track_frame) {
+void VideoEncoder::GetEncoderFrame(const pp::VideoFrame& track_frame)
+{
 	encoder.GetVideoFrame(
 			cb_factory.NewCallbackWithOutput(&VideoEncoder::OnEncoderFrame,
 					track_frame));
 }
 
 void VideoEncoder::OnEncoderFrame(int32 result, pp::VideoFrame encoder_frame,
-		pp::VideoFrame track_frame) {
+		pp::VideoFrame track_frame)
+{
 
-	if (result == PP_ERROR_ABORTED) {
+	if (result == PP_ERROR_ABORTED)
+	{
 		track->RecycleFrame(track_frame);
 		return;
 	}
-	if (result != PP_OK) {
+	if (result != PP_OK)
+	{
 		track->RecycleFrame(track_frame);
 		LogError(result,
 				"Não foi possível pegar o frame do encoder de vídeo, pulando frame...");
 		return;
 	}
 
-	if (track_frame.is_null()) {
-		Log("Frame " << track_frame.GetTimestamp() << " é nulo, pulando frame...");
+	if (track_frame.is_null())
+	{
+		Log(
+				"Frame " << track_frame.GetTimestamp() << " é nulo, pulando frame...");
 		return;
 	}
 
-	if (CopyVideoFrame(encoder_frame, track_frame) == PP_OK) {
+	if (CopyVideoFrame(encoder_frame, track_frame) == PP_OK)
+	{
 		EncodeFrame(encoder_frame);
 	}
 
 	track->RecycleFrame(track_frame);
 }
 
-int32 VideoEncoder::CopyVideoFrame(pp::VideoFrame dest, pp::VideoFrame src) {
-	if (dest.GetDataBufferSize() < src.GetDataBufferSize()) {
+int32 VideoEncoder::CopyVideoFrame(pp::VideoFrame dest, pp::VideoFrame src)
+{
+	if (dest.GetDataBufferSize() < src.GetDataBufferSize())
+	{
 		LogError(-99,
 				"Ao copiar o frame : "<< dest.GetDataBufferSize() << " < " << src.GetDataBufferSize());
 		return -99;
@@ -246,14 +293,16 @@ int32 VideoEncoder::CopyVideoFrame(pp::VideoFrame dest, pp::VideoFrame src) {
 	return PP_OK;
 }
 
-void VideoEncoder::EncodeFrame(const pp::VideoFrame& frame) {
+void VideoEncoder::EncodeFrame(const pp::VideoFrame& frame)
+{
 	timestamps.push_back(frame.GetTimestamp());
 
 	force_key_frame = frame_count > KEY_FRAME_RATIO;
 
 #ifdef LOG_FRAMES
 	Log("Encodando frame " << frame.GetTimestamp() * NS_EXP );
-	if(force_key_frame){Log("key frame");}
+	if(force_key_frame)
+	{	Log("key frame");}
 #endif
 
 	PP_Bool key_frame = force_key_frame ? PP_TRUE : PP_FALSE;
@@ -261,14 +310,20 @@ void VideoEncoder::EncodeFrame(const pp::VideoFrame& frame) {
 			cb_factory.NewCallback(&VideoEncoder::OnEncodeDone));
 }
 
-void VideoEncoder::OnEncodeDone(int32 result) {
-	if (result == PP_ERROR_ABORTED) {
+void VideoEncoder::OnEncodeDone(int32 result)
+{
+	if (result == PP_ERROR_ABORTED)
+	{
 		return;
 	}
-	if (result != PP_OK) {
+	if (result != PP_OK)
+	{
 		LogError(result, "Falha ao encodar");
-	}else{
-		if(force_key_frame){
+	}
+	else
+	{
+		if (force_key_frame)
+		{
 			frame_count = 0;
 			force_key_frame = false;
 		}
@@ -276,32 +331,39 @@ void VideoEncoder::OnEncodeDone(int32 result) {
 	}
 }
 
-void VideoEncoder::OnGetBitstreamBuffer(int32 result,
-		PP_BitstreamBuffer buffer) {
-	if (result == PP_ERROR_ABORTED) {
+void VideoEncoder::OnGetBitstreamBuffer(int32 result, PP_BitstreamBuffer buffer)
+{
+	if (result == PP_ERROR_ABORTED)
+	{
 		return;
 	}
-	if (result != PP_OK) {
+	if (result != PP_OK)
+	{
 		LogError(result, "Não foi possível adquirir o Bitstream Buffer");
 		return;
 	}
 
 	uint64 timestamp_ns = timestamps.front() * NS_EXP;
 
+
 	byte* frame_data = static_cast<byte*>(buffer.buffer);
 	uint64 size = buffer.size;
 	bool key_frame = buffer.key_frame;
 
 #ifdef LOG_FRAMES
-	Log("Salvando frame " << timestamp_ns << " de tamanho "<< size);
+	Log("Salvando frame " << timestamp_ns << " de tamanho "<< size << key frame?" key frame" : "");
 #endif
-	if (timestamp_ns >= last_ts) {
+	if (timestamp_ns >= last_ts)
+	{
 		last_ts = timestamp_ns;
-		if (!muxer.AddVideoFrame(frame_data, size, timestamp_ns, key_frame)) {
+		if (!muxer.AddVideoFrame(frame_data, size, timestamp_ns, key_frame))
+		{
 			LogError(-99, "Enquanto salvando frame "<< timestamp_ns);
 		}
 
-	} else {
+	}
+	else
+	{
 		Log("Frame "<< timestamp_ns << " atrasado, não salvando");
 	}
 
@@ -313,28 +375,35 @@ void VideoEncoder::OnGetBitstreamBuffer(int32 result,
 					&VideoEncoder::OnGetBitstreamBuffer));
 }
 
-void VideoEncoder::StartTrackFrames() {
-	for (std::map<int, VideoTrack*>::iterator it = tracks.begin();
-			it != tracks.end(); it++) {
-		it->second->StartTracking(frame_size);
-	}
+void VideoEncoder::StartTrackFrames()
+{
+//	for (std::map<int, VideoTrack*>::iterator it = tracks.begin();
+//			it != tracks.end(); it++)
+//	{
+//		it->second->StartTracking(frame_size);
+//	}
+	track->StartTracking(frame_size);
 	receiving_frames = true;
 }
 
-void VideoEncoder::StopEncode() {
+bool VideoEncoder::StopEncode()
+{
 	StopTrackingFrames();
 	encoder.Close();
 
 	tracks.clear();
 	encoding = false;
-	muxer.Finish();
+	return muxer.Finish();
 }
 
-void VideoEncoder::StopTrackingFrames() {
+void VideoEncoder::StopTrackingFrames()
+{
 	receiving_frames = false;
-	for (std::map<int, VideoTrack*>::iterator it = tracks.begin();
-			it != tracks.end(); it++) {
-		it->second->StopTracking();
-	}
+	track->StopTracking();
+//	for (std::map<int, VideoTrack*>::iterator it = tracks.begin();
+//			it != tracks.end(); it++)
+//	{
+//		it->second->StopTracking();
+//	}
 }
 
