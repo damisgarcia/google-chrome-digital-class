@@ -66,9 +66,9 @@ var Encoder = (function(){
     }
 
     if(bg_track){
-      naclOptions. video_track = [m_track, bg_track]
+      naclOptions.video_track = m_track
     } else{
-      naclOptions. video_track = [m_track]
+      naclOptions.video_track = m_track
     }
 
     common.naclModule.postMessage(naclOptions)
@@ -117,10 +117,7 @@ var Encoder = (function(){
     DigitalClass.situation = DigitalClass.status.paused
   }
 
-  self.updateTrack = function(type){
-    var track
-    type == "desktop" ? track = 0 : track = 1
-
+  self.updateTrack = function(track){    
     common.naclModule.postMessage({
       command: 'change_track',
       video_track: track

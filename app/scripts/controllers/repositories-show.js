@@ -26,7 +26,29 @@
 
           self.video = {
             sources: [],
-            theme: "bower_components/videogular-themes-default/videogular.css"
+            theme: "bower_components/videogular-themes-default/videogular.css",
+            processed: false,
+            onUpdateState: function(state){
+              var video = null
+              switch (state) {
+                case "play":
+                  if(!self.video.processed){
+                    video = $("video").get(0)
+                    video.playbackRate = 10.0 // Acelerando o Vídeo
+                  }
+                  break;
+                case "stop":
+                  if(!self.video.processed){
+                    video = $("video").get(0)
+                    video.playbackRate = 1.0
+                    video.currentTime = 0
+                    video.play()
+
+                    self.video.processed = true
+                  }
+                  break;
+              }
+            }
           }
 
           self.audio = {

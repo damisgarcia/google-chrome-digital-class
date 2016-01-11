@@ -4,7 +4,7 @@
     <button class="btn btn-danger btn-xs pull-right" ng-click="repository.destroy()">Destroy</button>
   </h3>
   <div class="row">
-    <videogular vg-theme="repository.video.theme" vg-auto-play="true">
+    <videogular vg-theme="repository.video.theme" vg-auto-play="true" vg-update-state="repository.video.onUpdateState($state)">
     	<vg-media vg-src="repository.video.sources"
     			vg-tracks="repository.video.tracks">
     	</vg-media>
@@ -25,7 +25,7 @@
   </div>
 </div>
 <br></br><br>
-<div class="container">  
+<div class="container">
   <div class="row">
     <videogular vg-theme="repository.audio.theme" vg-auto-play="true" class="videogular-container audio">
     	<vg-media vg-src="repository.audio.sources"	vg-tracks="repository.audio.tracks" vg-type="audio">

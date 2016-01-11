@@ -97,12 +97,14 @@ function moduleDidLoad() {
         })
       }
       else if (res.action == "focus desktop") {
-        Encoder.updateTrack("desktop")
+        var desktop_track = DigitalClass.desktopStream.getVideoTracks()[0]
+        Encoder.updateTrack(desktop_track)
         $desktopInRecorder = true
       }
 
       else if (res.action == "focus webcam") {
-        Encoder.updateTrack("webcam")
+        var webmcam_track = DigitalClass.camStream.getVideoTracks()[0]
+        Encoder.updateTrack(webmcam_track)
         $desktopInRecorder = false
       }
       // Repositories Routes
