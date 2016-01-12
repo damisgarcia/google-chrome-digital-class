@@ -9,7 +9,7 @@
  */
 
 angular.module('digitalclassApp')
-  .factory('Profile', function ($http,$window) {
+  .factory('Profile', function ($http,$window,$rootScope) {
     var Profile = (function(){
       var SERVER = "http://127.0.0.1" // for development
       var API = "/api/v1"
@@ -22,7 +22,11 @@ angular.module('digitalclassApp')
       }
 
       function onFail(error){
-        console.log(error)
+        // Remove Cache
+        $.removeCookie("profile")
+        // Clear Angular Objects
+        window.Profile = null
+        $rootScope.$profile = null
       }
 
       return self

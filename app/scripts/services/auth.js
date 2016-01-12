@@ -14,8 +14,7 @@ angular.module('digitalclassApp')
       var self = {}
 
       self.isAuthorized = function(){
-        var profile = $.cookie('profile')
-        console.log(profile)
+        var profile = $.cookie('profile')        
         if(profile != undefined || profile != null){
           var credentials = profile.credentials
 
@@ -63,7 +62,7 @@ angular.module('digitalclassApp')
         $.removeCookie("profile")
         // Clear Angular Objects
         window.Profile = null
-        $rootScope.$profile = null        
+        $rootScope.$profile = null
       }
 
       return self

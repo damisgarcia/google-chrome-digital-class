@@ -22,7 +22,7 @@ angular.module('digitalclassApp')
           return false
         }
       }
-      $state.go("repositories.upload")
+
       ngDialog.open({
         template: 'app/views/repositories-upload.html',
         controller:"RepositoriesUploadCtrl as repository",
@@ -30,9 +30,19 @@ angular.module('digitalclassApp')
       })
     }
 
-    self.openEdit = function(index){
-      $state.go("repositories.edit")
+    self.openDownload = function(index){
       self.select_file = self.files[index]
+
+      ngDialog.open({
+        template: 'app/views/repositories-download.html',
+        controller:"RepositoriesDownloadCtrl as repository",
+        scope: $scope
+      })
+    }
+
+    self.openEdit = function(index){
+      self.select_file = self.files[index]
+
       ngDialog.open({
         template: 'app/views/repositories-edit.html',
         controller:"RepositoriesEditCtrl as repository",
