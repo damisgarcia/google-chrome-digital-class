@@ -14,18 +14,11 @@ angular.module('digitalclassApp')
       var self = {}
 
       self.isAuthorized = function(){
-        var profile = $.cookie('profile')        
+        var profile = $.cookie('profile')
         if(profile != undefined || profile != null){
-          var credentials = profile.credentials
-
-          Profile.getProfile(profile.credentials,function(data){
-            profile = data
-            profile.credentials = credentials
-
-            Profile.data = profile
-            $rootScope.$profile = Profile.data
-            $.cookie('profile', profile)
-          })
+          if("credentials" in profile){
+            setProfile(profile)
+          }
           return true
         }
 
@@ -51,6 +44,12 @@ angular.module('digitalclassApp')
       self.destroy_credential = function(callback){
         setTimeout(clearProfile,200)
         if(callback) setTimeout(callback,600)
+      }
+
+      function setProfile(profile){
+        Profile.data = profile
+        $rootScope.$profile = Profile.data
+        return true
       }
 
       function onHttpFail(error){

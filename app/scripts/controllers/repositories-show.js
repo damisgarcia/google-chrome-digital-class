@@ -11,6 +11,43 @@
     .controller('RepositoriesShowCtrl', function ($state,$stateParams,$scope,$sce) {
       var self = this
 
+      self.video = {
+        onUpdateState: function(state){
+          switch (state) {
+            case "play":
+              self.audio.api.play()
+              break;
+            case "pause":
+              self.audio.api.pause()
+              break;
+            case "stop":
+              self.audio.api.stop()
+              break;
+          }
+        },
+        onPlayerReady: function(api){
+          self.video.api = api
+          // Events
+          var video = self.video.api.mediaElement[0]
+
+          video.onvolumechange = function(evt){
+            self.audio.api.mediaElement[0].volume = evt.target.volume
+          }
+
+          video.onseeked = function(evt){
+            self.audio.api.mediaElement[0].currentTime = evt.target.currentTime
+          }
+
+          video.volume = 0.5
+        }
+      }
+
+      self.audio = {
+        onPlayerReady: function(api){
+          self.audio.api = api
+        }
+      }
+
       self.destroy = function(){
         if(confirm("Really delete this file"))
         background.postMessage({action:"repositories destroy", target: $stateParams.filePath})
@@ -24,34 +61,13 @@
 
           self.filename = $stateParams.filePath
 
-          self.video = {
+          self.video.config = {
             sources: [],
             theme: "bower_components/videogular-themes-default/videogular.css",
-            processed: false,
-            onUpdateState: function(state){
-              var video = null
-              switch (state) {
-                case "play":
-                  if(!self.video.processed){
-                    video = $("video").get(0)
-                    video.playbackRate = 10.0 // Acelerando o Vídeo
-                  }
-                  break;
-                case "stop":
-                  if(!self.video.processed){
-                    video = $("video").get(0)
-                    video.playbackRate = 1.0
-                    video.currentTime = 0
-                    video.play()
-
-                    self.video.processed = true
-                  }
-                  break;
-              }
-            }
+            processed: false
           }
 
-          self.audio = {
+          self.audio.config = {
             sources: [],
             theme: "bower_components/videogular-themes-default/videogular.css"
           }
@@ -59,10 +75,10 @@
           angular.forEach(res.media_group,function(media){
             switch (true) {
               case /\.wav$/.test(media.$name):
-                self.audio.sources.push({src: $sce.trustAsResourceUrl(media.extensionPath), type: "audio/wav"})
+                self.audio.config.sources.push({src: $sce.trustAsResourceUrl(media.extensionPath), type: "audio/wav"})
                 break
               case /\.webm$/.test(media.$name):
-                self.video.sources.push({src: $sce.trustAsResourceUrl(media.extensionPath), type: "video/webm"})
+                self.video.config.sources.push({src: $sce.trustAsResourceUrl(media.extensionPath), type: "video/webm"})
                 break
               case /\.png$/.test(media.$name):
                 self.poster = media.extensionPath

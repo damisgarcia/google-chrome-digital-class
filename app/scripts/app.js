@@ -62,7 +62,7 @@ angular.module('digitalclassApp',
       },
       data:{
         requiredAuthorization: true,
-        redirect: "home"
+        redirect: "login"
       }
     })
 
@@ -153,13 +153,21 @@ angular.module('digitalclassApp',
 
   $rootScope.$on('$stateChangeStart',function(event, toState, toParams, fromState, fromParams){
     var isAuthorized = Auth.isAuthorized()
-
+    
     if("data" in toState){
-      if("redirectIfAuthorized" in toState.data){
-        if(toState.data.redirectIfAuthorized && isAuthorized){
+      if("requiredAuthorization" in toState.data){
+        if("redirectIfAuthorized" in toState.data){
+          if(isAuthorized){
+            event.preventDefault() // important!
+            $state.go(toState.data.redirect)
+          }
+        }
+
+        if(!isAuthorized){
           event.preventDefault() // important!
           $state.go(toState.data.redirect)
         }
+
       }
     }
   })

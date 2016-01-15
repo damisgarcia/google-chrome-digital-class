@@ -21,8 +21,8 @@
         <td>
           <button class="btn btn-xs btn-danger  pull-right margin-right"  ng-click="repositories.destroy($index)">Destroy</button>
           <button class="btn btn-xs btn-default pull-right margin-right" ng-click="repositories.openUpload($index)" ng-disabled="!repositories.profile.data">Upload</button>
-          <button class="btn btn-xs btn-default pull-right margin-right" ng-click="repositories.openEdit($index)">Editar</button>
-          <a class="btn btn-xs btn-default pull-right margin-right" ng-click="repositories.openDownload($index)">Download</a>
+          <a class="btn btn-xs btn-default pull-right margin-right" ng-click="repositories.openDownload($index)">Save on disk</a>
+          <button class="btn btn-xs btn-default pull-right margin-right" ng-click="repositories.openEdit($index)">Renomear</button>
         </td>
       </tr>
     </table>
