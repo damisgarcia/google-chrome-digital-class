@@ -18,6 +18,18 @@ body{
 *
 *----------------*/
 
+
+/*-------------------
+*
+*   Dialog
+*
+*--------------------*/
+
+.ngdialog-content{
+  max-width: 80%;
+  min-width: 30%;
+}
+
 .margin-top{
   margin-top: 1.2rem !important;
 }

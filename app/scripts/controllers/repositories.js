@@ -8,16 +8,21 @@
  * Controller of the digitalclassApp
  */
 angular.module('digitalclassApp')
-  .controller('RepositoriesCtrl', function ($scope,$rootScope,$cookieStore,$sce,$state,ngDialog) {
+  .controller('RepositoriesCtrl', function ($scope,$rootScope,$sce,$state,$http,ngDialog) {
     var self = this
     var background = chrome.runtime.connect({name:"background repositories"})
 
-    this.profile = $cookieStore.get('profile')
+    this.profile = Profile
     this.selection = []
 
     self.openUpload = function(index){
-      $state.go("repositories.upload")
       self.select_file = self.files[index]
+      if(self.select_file.uploaded){
+        if(!confirm("Este arquivo já foi enviado deseja realmente reenviar?")){
+          return false
+        }
+      }
+
       ngDialog.open({
         template: 'app/views/repositories-upload.html',
         controller:"RepositoriesUploadCtrl as repository",
@@ -25,9 +30,19 @@ angular.module('digitalclassApp')
       })
     }
 
-    self.openEdit = function(index){
-      $state.go("repositories.edit")
+    self.openDownload = function(index){
       self.select_file = self.files[index]
+
+      ngDialog.open({
+        template: 'app/views/repositories-download.html',
+        controller:"RepositoriesDownloadCtrl as repository",
+        scope: $scope
+      })
+    }
+
+    self.openEdit = function(index){
+      self.select_file = self.files[index]
+
       ngDialog.open({
         template: 'app/views/repositories-edit.html',
         controller:"RepositoriesEditCtrl as repository",
@@ -78,6 +93,13 @@ angular.module('digitalclassApp')
 
     background.onMessage.addListener(function(res){
       if(res.action == "repositories list"){
+        angular.forEach(res.files,function(file){
+          isUploaded(file,function(data){
+            file.uploaded = true
+          },function(error){
+            file.uploaded = false
+          })
+        })
         self.files = res.files
       }
       $scope.$apply()
@@ -89,4 +111,9 @@ angular.module('digitalclassApp')
     $rootScope.$on('ngDialog.closed', function (e, $dialog) {
       background.postMessage({action:"repositories list"})
     })
+
+    // private
+    function isUploaded(file,callback,error){
+      $http.get(file.extensionPath + "/synchronized.txt").success(callback).error(error)
+    }
   });

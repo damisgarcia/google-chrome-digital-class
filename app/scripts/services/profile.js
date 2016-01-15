@@ -7,25 +7,34 @@
  * # profile
  * Factory in the digitalclassApp.
  */
+
 angular.module('digitalclassApp')
-  .factory('Profile', function ($http) {
+  .factory('Profile', function ($http,$window,$rootScope) {
     var Profile = (function(){
       var SERVER = "http://127.0.0.1" // for development
       var API = "/api/v1"
 
       var self = {}
 
-      self.getProfile = function(token,callback){
+      self.getProfile = function(token,callback,fail){
         var path = SERVER + API + "/users/profile?access_token=" + token.access_token
-        $http.get(path).success(callback).error(onFail)
+        $http.get(path).success(callback).error(fail || onFail)
       }
 
       function onFail(error){
-        console.log(error)
+        // Remove Cache
+        $.removeCookie("profile")
+        // Clear Angular Objects
+        window.Profile = null
+        $rootScope.$profile = null
       }
 
       return self
-    }(Profile))
+    }(Profile, window))
 
-    return Profile
+    if(!window.Profile){
+      window.Profile = Profile
+    }
+
+    return window.Profile
   });

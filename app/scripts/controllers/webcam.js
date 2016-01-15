@@ -9,7 +9,8 @@
  */
 angular.module('digitalclassApp')
   .controller('WebcamCtrl', function ($scope,$state,$cookieStore) {
-    $cookieStore.put('state', $state.current.name)
+    // $cookieStore.put('state', $state.current.name)
+    $.cookie('state', $state.current.name)
 
     var self = this
     $scope.busy = BUSY

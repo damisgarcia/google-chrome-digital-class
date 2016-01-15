@@ -97,12 +97,14 @@ function moduleDidLoad() {
         })
       }
       else if (res.action == "focus desktop") {
-        Encoder.updateTrack("desktop")
+        var desktop_track = DigitalClass.desktopStream.getVideoTracks()[0]
+        Encoder.updateTrack(desktop_track)
         $desktopInRecorder = true
       }
 
       else if (res.action == "focus webcam") {
-        Encoder.updateTrack("webcam")
+        var webmcam_track = DigitalClass.camStream.getVideoTracks()[0]
+        Encoder.updateTrack(webmcam_track)
         $desktopInRecorder = false
       }
       // Repositories Routes
@@ -128,26 +130,21 @@ function moduleDidLoad() {
 
       else if(res.action == "repositories show media-group"){
         fileSystem.open(res.target,function(result){
-          port.postMessage({action:"repositories show media-group",media_group: result})
+          port.postMessage({action:"repositories show media-group", media_group: result, parent: res.target})
         })
       }
 
 
       else if(res.action == "repositories destroy"){
-        var is_file_regex = /[\.[\d\w]$/
-        if(is_file_regex.test(res.target)){
-          fileSystem.find_by_name(res.target,function(f){
-            fileSystem.destroy(f,function(){
-              console.log("File Destroy")
-            })
+        fileSystem.rmdir(res.target,function(f){
+          fileSystem.list(function(repositories){
+            port.postMessage({action:"repositories list",files: repositories.reverse()})
           })
-        } else{
-          fileSystem.rmdir(res.target,function(f){
-            fileSystem.list(function(repositories){
-              port.postMessage({action:"repositories list",files: repositories.reverse()})
-            })
-          })
-        }
+        })
+      }
+
+      else if(res.action == "repositories markfolder"){
+        fileSystem.save(res.target + "/synchronized.txt", new Blob(["Synchronized"],{type:"text/plain"}))
       }
     })
   })

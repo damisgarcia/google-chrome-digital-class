@@ -8,7 +8,9 @@
  * Controller of the digitalclassApp
  */
 angular.module('digitalclassApp')
-  .controller('ProfileCtrl', function ($cookieStore) {
-    var self = this
-    self.$this = $cookieStore.get('profile')
+  .controller('ProfileCtrl', function ($cookieStore,$stateParams,$state,Profile,Auth) {
+    if($stateParams.logout) Auth.destroy_credential(function(){      
+      $state.go("home")
+    })
+    this.obj = Profile
   });

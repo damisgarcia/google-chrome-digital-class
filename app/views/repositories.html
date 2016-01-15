@@ -12,12 +12,17 @@
         <td>
           <input class="margin-right" type="checkbox" ng-value="$index" ng-click="toggleSelection(file)" name="repositoriesIds[]" ng-checked="file.checked">
           <a ui-sref="repositories.show({filePath:file.$name})" class="margin-right"><span ng-bind-html="trustImage(file)"></span></a>
-          <a ui-sref="repositories.show({filePath:file.$name})"><i class="fa fa-folder-open-o"></i> {{file.$name}}</a>
+          <a ui-sref="repositories.show({filePath:file.$name})">
+            <i class="fa fa-folder-open-o"></i>
+            <i class="fa fa-check" ng-show="file.uploaded" title="Sincronizado"></i>
+            {{file.$name}}
+          </a>
         </td>
         <td>
           <button class="btn btn-xs btn-danger  pull-right margin-right"  ng-click="repositories.destroy($index)">Destroy</button>
-          <button class="btn btn-xs btn-default pull-right margin-right" ng-click="repositories.openUpload($index)" ng-disabled="!repositories.profile">Upload</button>
+          <button class="btn btn-xs btn-default pull-right margin-right" ng-click="repositories.openUpload($index)" ng-disabled="!repositories.profile.data">Upload</button>
           <button class="btn btn-xs btn-default pull-right margin-right" ng-click="repositories.openEdit($index)">Editar</button>
+          <a class="btn btn-xs btn-default pull-right margin-right" ng-click="repositories.openDownload($index)">Download</a>
         </td>
       </tr>
     </table>
