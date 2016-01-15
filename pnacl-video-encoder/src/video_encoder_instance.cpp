@@ -23,6 +23,24 @@
 
 #define FS_PATH "/persistent/"
 
+//-----------------------Workers para executar encoders em paralelo-------------------------------
+//Necessários pois a thread principal do Pepper(chrome) não permite bloqueios(como em leitura/escrita de arquivos, espera por recursos, etc).
+
+pp::Instance* _instance = 0;
+VideoEncoder* _video_enc = 0;
+
+pp::Size _video_size;
+PP_VideoProfile _video_profile;
+void VideoEncoderWorker(void* params, int result);
+
+pp::Resource _new_track_res;
+void ChangeTrackWorker(void* params, int result);
+
+WebmMuxer* _muxer = 0;
+void StopEncoderWorker(void* params, int result);
+
+//-----------------------------------------------------------------------------------------------------
+
 VideoEncoderInstance::VideoEncoderInstance(PP_Instance instance,
 		pp::Module* module) :
 		pp::Instance(instance), handle(this),
@@ -33,6 +51,7 @@ VideoEncoderInstance::VideoEncoderInstance(PP_Instance instance,
 						handle)
 {
 	InitializeFileSystem(FS_PATH);
+	__instance = this;
 }
 
 VideoEncoderInstance::~VideoEncoderInstance()
@@ -70,19 +89,6 @@ void VideoEncoderInstance::InitializeFileSystem(const std::string& fsPath)
 
 }
 
-std::vector<pp::Resource> _video_track_res;
-pp::Resource _new_track_res;
-pp::Size _video_size;
-PP_VideoProfile _video_profile;
-VideoEncoder* _video_enc = 0;
-void ChangeTrackWorker(void* params, int result);
-void VideoEncoderWorker(void* params, int result);
-#ifdef USING_AUDIO
-pp::Resource _audio_track_res;
-AudioEncoder* _audio_enc;
-void AudioEncoderWorker(void* params, int result);
-#endif
-
 void VideoEncoderInstance::HandleMessage(const pp::Var& var_message)
 {
 
@@ -106,9 +112,6 @@ void VideoEncoderInstance::HandleMessage(const pp::Var& var_message)
 		}
 		muxer = new WebmMuxer(*this);
 		video_enc = new VideoEncoder(this, *muxer);
-#ifdef USING_AUDIO
-		audio_enc = new AudioEncoder(this, *muxer);
-#endif
 
 		pp::Size requested_size = pp::Size(dict_message.Get("width").AsInt(),
 				dict_message.Get("height").AsInt());
@@ -129,17 +132,6 @@ void VideoEncoderInstance::HandleMessage(const pp::Var& var_message)
 			return;
 		}
 
-#ifdef USING_AUDIO
-		pp::Var var_audio_track = dict_message.Get("audio_track");
-		if (!var_audio_track.is_resource())
-		{
-			LogError(PP_ERROR_BADARGUMENT, "audio_track não é um resource");
-			return;
-		}
-
-		audio_track_res = var_audio_track.AsResource();
-#endif
-
 		//Variáveis tem que serem passadas assim porque o callback da PPAPI não suporta tantos argumentos(máximo de 3).
 		_video_profile = PP_VIDEOPROFILE_VP8_ANY;
 		_video_size = requested_size;
@@ -159,13 +151,6 @@ void VideoEncoderInstance::HandleMessage(const pp::Var& var_message)
 		pp::CompletionCallback video_callback(&VideoEncoderWorker, 0);
 		video_encoder_thread.message_loop().PostWork(video_callback, 0);
 
-#ifdef USING_AUDIO
-		_audio_enc = &audio_enc;
-
-		audio_encoder_thread.Start();
-		pp::CompletionCallback audio_callback(&AudioEncoderWorker,0);
-		audio_encoder_thread.message_loop().PostWork(audio_callback,0);
-#endif
 		Log("Comando executado com sucesso");
 	}
 
@@ -183,6 +168,7 @@ void VideoEncoderInstance::HandleMessage(const pp::Var& var_message)
 
 	else if (command == "stop")
 	{
+
 		if (!video_enc)
 		{
 			Log("Inicie um encode antes de tentar parar!");
@@ -195,18 +181,11 @@ void VideoEncoderInstance::HandleMessage(const pp::Var& var_message)
 		else
 		{
 			Log("Parando encode...");
-			if (!video_enc->StopEncode())
-			{
-				LogError(-99, "Erro enquanto parando o encode");
-			}
-#ifdef USING_AUDIO
-			audio_enc.Stop();
-			delete_and_nulify(audio_enc);
-#endif
-			delete_and_nulify(video_enc);
-			delete_and_nulify(muxer);
-			video_track_res.clear();
-			PostMessage("StopComplete");
+			_instance = this;
+			_video_enc = video_enc;
+			_muxer = muxer;
+			pp::CompletionCallback stop_callback(&StopEncoderWorker, 0);
+			video_encoder_thread.message_loop().PostWork(stop_callback, 0);
 		}
 		Log("Comando executado com sucesso");
 	}
@@ -216,6 +195,7 @@ void VideoEncoderInstance::HandleMessage(const pp::Var& var_message)
 	}
 
 }
+//--------------------------Impl. dos Workers--------------------------------
 void ChangeTrackWorker(void* params, int result)
 {
 	_video_enc->SetTrack(_new_track_res);
@@ -223,12 +203,18 @@ void ChangeTrackWorker(void* params, int result)
 
 void VideoEncoderWorker(void* params, int result)
 {
-	_video_enc->Encode(_video_size, _video_profile);
+	_video_enc->Encode(_video_size,_video_profile);
 }
 
-void AudioEncoderWorker(void* params, int result)
+void StopEncoderWorker(void* params, int result)
 {
-#ifdef USING_AUDIO
-	_audio_enc->Start(_audio_track_res);
-#endif
+
+	if (_video_enc->StopEncode())
+	{
+		delete_and_nulify(_video_enc);
+		delete_and_nulify(_muxer);
+
+	}
+
+	_instance->PostMessage("StopComplete");
 }

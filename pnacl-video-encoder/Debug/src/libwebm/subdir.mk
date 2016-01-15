@@ -42,14 +42,14 @@ CPP_DEPS += \
 src/libwebm/%.o: ../src/libwebm/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross G++ Compiler'
-	pnacl-clang++ -std=gnu++11 -I/home/joaquim/nacl/nacl_sdk/pepper_46/toolchain/linux_pnacl/include/c++/v1 -O0 -Wall -c -o "$@" "$<"
+	pnacl-clang++ -std=gnu++11 -I/home/joaquim/nacl/nacl_sdk/pepper_46/include -I/home/joaquim/nacl/nacl_sdk/pepper_46/toolchain/linux_pnacl/include/c++/v1 -O0 -Wall -c -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
 src/libwebm/%.o: ../src/libwebm/%.cc
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross G++ Compiler'
-	pnacl-clang++ -std=gnu++11 -I/home/joaquim/nacl/nacl_sdk/pepper_46/toolchain/linux_pnacl/include/c++/v1 -O0 -Wall -c -o "$@" "$<"
+	pnacl-clang++ -std=gnu++11 -I/home/joaquim/nacl/nacl_sdk/pepper_46/include -I/home/joaquim/nacl/nacl_sdk/pepper_46/toolchain/linux_pnacl/include/c++/v1 -O0 -Wall -c -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

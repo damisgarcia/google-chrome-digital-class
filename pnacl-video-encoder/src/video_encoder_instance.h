@@ -25,6 +25,8 @@
 #include "audio_encoder.h"
 #include "tipos.h"
 
+static pp::Instance* __instance;
+
 class VideoEncoderInstance: public pp::Instance {
 public:
 	VideoEncoderInstance(PP_Instance instance, pp::Module* module);
@@ -57,8 +59,6 @@ private:
 	pp::SimpleThread audio_encoder_thread;
 	/**Nome do arquivo a ser salvo pelo muxer*/
 	std::string file_name;
-
-	std::vector<pp::Resource> video_track_res;
 
 	pp::Resource audio_track_res;
 };

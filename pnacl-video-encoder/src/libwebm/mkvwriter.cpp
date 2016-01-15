@@ -5,6 +5,8 @@
 // tree. An additional intellectual property rights grant can be found
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
+//
+// Modified by joaquimmnetto for use on Chrome NaCl.
 
 #include "mkvwriter.hpp"
 
@@ -12,7 +14,7 @@
 #include <share.h>  // for _SH_DENYWR
 #endif
 
-#include <sys/mount.h>
+//#include <sys/mount.h>
 
 //#include <cnew>
 

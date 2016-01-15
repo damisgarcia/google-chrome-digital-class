@@ -20,7 +20,6 @@
 #include "mkvwriter.hpp"
 #include "webmids.hpp"
 
-
 #ifdef _MSC_VER
 // Disable MSVC warnings that suggest making code non-portable.
 #pragma warning(disable : 4996)
@@ -366,40 +365,40 @@ uint64 Cues::Size() {
   return size;
 }
 
-bool Cues::Write(IMkvWriter* writer) const {
+int Cues::Write(IMkvWriter* writer) const {
   if (!writer)
-    return false;
+    return -201;
 
   uint64 size = 0;
   for (int32 i = 0; i < cue_entries_size_; ++i) {
     const CuePoint* const cue = GetCueByIndex(i);
 
     if (!cue)
-      return false;
+      return -202;
 
     size += cue->Size();
   }
 
   if (!WriteEbmlMasterElement(writer, kMkvCues, size))
-    return false;
+    return -203;
 
   const int64 payload_position = writer->Position();
   if (payload_position < 0)
-    return false;
+    return -204;
 
   for (int32 i = 0; i < cue_entries_size_; ++i) {
     const CuePoint* const cue = GetCueByIndex(i);
 
     if (!cue->Write(writer))
-      return false;
+      return -205;
   }
 
   const int64 stop_position = writer->Position();
   if (stop_position < 0)
-    return false;
+    return -206;
 
   if (stop_position - payload_position != static_cast<int64>(size))
-    return false;
+    return -207;
 
   return true;
 }
@@ -1836,13 +1835,15 @@ bool Cluster::AddMetadata(const uint8* data, uint64 length, uint64 track_number,
 
 void Cluster::AddPayloadSize(uint64 size) { payload_size_ += size; }
 
-bool Cluster::Finalize() {
+int Cluster::Finalize() {
   if (!writer_ || finalized_ || size_position_ == -1)
     return false;
 
   if (writer_->Seekable()) {
     const int64 pos = writer_->Position();
-
+    if( pos < 0 ){
+    	return pos;
+    }
     if (writer_->Position(size_position_))
       return false;
 
@@ -2396,9 +2397,9 @@ bool Segment::CopyAndMoveCuesBeforeClusters(mkvparser::IMkvReader* reader,
   return true;
 }
 
-bool Segment::Finalize() {
+int Segment::Finalize() {
   if (WriteFramesAll() < 0){
-	  return false;
+	  return -11;
   }
 
 
@@ -2406,9 +2407,11 @@ bool Segment::Finalize() {
     if (cluster_list_size_ > 0) {
       // Update last cluster's size
       Cluster* const old_cluster = cluster_list_[cluster_list_size_ - 1];
+      int old_cluster_finish = old_cluster->Finalize();
+      if (!old_cluster || old_cluster_finish < 0 || old_cluster_finish == false)
+    	  return old_cluster_finish;
 
-      if (!old_cluster || !old_cluster->Finalize())
-        return false;
+
     }
 
     if (chunking_ && chunk_writer_cluster_) {
@@ -2421,73 +2424,75 @@ bool Segment::Finalize() {
         segment_info_.timecode_scale();
     segment_info_.set_duration(duration);
     if (!segment_info_.Finalize(writer_header_))
-      return false;
+      return -13;
 
     if (output_cues_)
       if (!seek_head_.AddSeekEntry(kMkvCues, MaxOffset()))
-        return false;
+        return -14;
 
     if (chunking_) {
       if (!chunk_writer_cues_)
-        return false;
+        return -15;
 
       char* name = NULL;
       if (!UpdateChunkName("cues", &name))
-        return false;
+        return -16;
 
       const bool cues_open = chunk_writer_cues_->Open(name);
       delete[] name;
       if (!cues_open)
-        return false;
+        return -17;
     }
 
     cluster_end_offset_ = writer_cluster_->Position();
 
     // Write the seek headers and cues
-    if (output_cues_)
-      if (!cues_.Write(writer_cues_))
-        return false;
+    if (output_cues_){
+    	int r = cues_.Write(writer_cues_);
+      if (r < 0)
+        return r;
+    }
 
     if (!seek_head_.Finalize(writer_header_))
-      return false;
+      return -19;
 
     if (writer_header_->Seekable()) {
       if (size_position_ == -1)
-        return false;
+        return -20;
 
       const int64 segment_size = MaxOffset();
       if (segment_size < 1)
-        return false;
+        return -21;
 
       const int64 pos = writer_header_->Position();
       UpdateDocTypeVersion();
       if (doc_type_version_ != doc_type_version_written_) {
         if (writer_header_->Position(0))
-          return false;
+          return -22;
 
         if (!WriteEbmlHeader(writer_header_, doc_type_version_))
-          return false;
+          return -23;
         if (writer_header_->Position() != ebml_header_size_)
-          return false;
+          return -24;
 
         doc_type_version_written_ = doc_type_version_;
       }
 
       if (writer_header_->Position(size_position_))
-        return false;
+        return -25;
 
       if (WriteUIntSize(writer_header_, segment_size, 8))
-        return false;
+        return -26;
 
       if (writer_header_->Position(pos))
-        return false;
+        return -27;
     }
 
     if (chunking_) {
       // Do not close any writers until the segment size has been written,
       // otherwise the size may be off.
       if (!chunk_writer_cues_ || !chunk_writer_header_)
-        return false;
+        return -28;
 
       chunk_writer_cues_->Close();
       chunk_writer_header_->Close();

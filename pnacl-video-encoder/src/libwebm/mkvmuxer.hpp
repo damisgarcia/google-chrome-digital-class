@@ -223,7 +223,7 @@ class Cues {
   uint64 Size();
 
   // Output the Cues element to the writer. Returns true on success.
-  bool Write(IMkvWriter* writer) const;
+  int Write(IMkvWriter* writer) const;
 
   int32 cue_entries_size() const { return cue_entries_size_; }
   void set_output_block_number(bool output_block_number) {
@@ -934,7 +934,7 @@ class Cluster {
 
   // Closes the cluster so no more data can be written to it. Will update the
   // cluster's size if |writer_| is seekable. Returns true on success.
-  bool Finalize();
+  int Finalize();
 
   // Returns the size in bytes for the entire Cluster element.
   uint64 Size() const;
@@ -1249,7 +1249,7 @@ class Segment {
   // Writes out any frames that have not been written out. Finalizes the last
   // cluster. May update the size and duration of the segment. May output the
   // Cues element. May finalize the SeekHead element. Returns true on success.
-  bool Finalize();
+  int Finalize();
 
   // Returns the Cues object.
   Cues* GetCues() { return &cues_; }

@@ -10,6 +10,8 @@
 #define INSTANCE instance
 #include "log.h"
 
+#include <cerrno>
+
 WebmMuxer::WebmMuxer(pp::Instance& _instance) :
 		instance(_instance), pSegment(0), last_frame_ts(0), delayed_frame_count(0), initialized(
 				false), finished(false)
@@ -38,7 +40,10 @@ int WebmMuxer::Init(std::string file_name)
 	}
 	pSegment = new mkvmuxer::Segment();
 	pSegment->Init(&writer);
-	pSegment->set_mode(mkvmuxer::Segment::kLive);
+	pSegment->set_mode(mkvmuxer::Segment::kFile);
+
+	mkvmuxer::SegmentInfo* info = pSegment->GetSegmentInfo();
+	info->set_writing_app("Lousa Digital");
 
 	video_track_num = pSegment->AddVideoTrack(video_width, video_height, 1);
 
@@ -99,9 +104,12 @@ bool WebmMuxer::Finish()
 	{
 		return true;
 	}
-	if (!pSegment->Finalize())
+
+	int segRes = 0;
+	if ((segRes = pSegment->Finalize()) < 0)
 	{
-		LogError(-99, "Erro ao finalizar o arquivo webm");
+		LogError(errno, "Errno value");
+		LogError(segRes, "Erro ao finalizar o arquivo webm");
 		return false;
 	}
 

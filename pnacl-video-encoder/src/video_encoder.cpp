@@ -97,47 +97,7 @@ void VideoEncoder::SetTrack(pp::Resource track_res)
 		StartTrackFrames();
 	}
 	force_key_frame = true;
-
-//	if (tracks.find(track_id) != tracks.end())
-//	{
-//		if (track == NULL)
-//		{
-//			track = tracks[track_id];
-//		}
-//		else
-//		{
-//			new_track = tracks[track_id];
-//		}
-//
-//	}
-//	else
-//	{
-//		LogError(-99, "Track " << track_id << " não encontrada");
-//		return;f
-//	}
-
 }
-//
-//void VideoEncoder::AddTrack(int track_id, pp::Resource track_res)
-//{
-//	if (encoding)
-//	{
-//		LogError(-99,
-//				"Adicione as trilhas antes do início da execução do encoder!");
-//		return;
-//	}
-//
-//	if (!pp::MediaStreamVideoTrack::IsMediaStreamVideoTrack(track_res))
-//	{
-//		LogError(-99, "Track não é um recurso válido");
-//		return;
-//	}
-//
-//	if (tracks.find(track_id) == tracks.end())
-//	{
-//		tracks[track_id] = new VideoTrack(instance, track_res);
-//	}
-//}
 
 void VideoEncoder::ProbeEncoder()
 {
@@ -377,11 +337,6 @@ void VideoEncoder::OnGetBitstreamBuffer(int32 result, PP_BitstreamBuffer buffer)
 
 void VideoEncoder::StartTrackFrames()
 {
-//	for (std::map<int, VideoTrack*>::iterator it = tracks.begin();
-//			it != tracks.end(); it++)
-//	{
-//		it->second->StartTracking(frame_size);
-//	}
 	track->StartTracking(frame_size);
 	receiving_frames = true;
 }
@@ -400,10 +355,5 @@ void VideoEncoder::StopTrackingFrames()
 {
 	receiving_frames = false;
 	track->StopTracking();
-//	for (std::map<int, VideoTrack*>::iterator it = tracks.begin();
-//			it != tracks.end(); it++)
-//	{
-//		it->second->StopTracking();
-//	}
 }
 
