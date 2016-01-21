@@ -1,8 +1,16 @@
+
+/*
+ * Author: Joaquim neto@LME (www.github.com/joaquimmnetto)
+ *
+ */
+
 #ifndef LOG_H
 #define LOG_H
 
+//Se definido, adciona log mostrando estado de cada frame. Use somente para debug.
 //#define LOG_FRAMES
 
+//necessário ser definido com um pp::Instance, objeto que tem o comando de log da PPAPI.
 #ifndef INSTANCE
 	#define INSTANCE
 #endif
@@ -12,34 +20,11 @@
 
 
 std::stringstream __logStream;
+//Log no formato Em 'file.cpp':'xx' - 'exp'.
+//exp se comporta como um input em sstream(sstream << exp).
 #define Log(exp) __logStream.str(std::string()); __logStream << "Em " << __FILE__ <<":"<< __LINE__ <<" - " << exp; INSTANCE.LogToConsole(PP_LOGLEVEL_LOG,__logStream.str())
+//Log no formato Em 'file.cpp':'xx' - Erro:'error':'exp'.
+//Tanto error como exp se comportam como um input em sstream(sstream<<error<<exp)
 #define LogError(error, exp) __logStream.str(std::string()); __logStream << "Em " << __FILE__ <<":"<< __LINE__ <<" - " << "Erro: "<< error << " : " << exp; INSTANCE.LogToConsole(PP_LOGLEVEL_ERROR,__logStream.str())
 
 #endif
-//chrome-extension://iifpnkedoaiclkodeheciokndhgaalhj/test-multi-track.html
-/*mkvparser::MkvReader reader;
-	std::stringstream sfilename;
-	sfilename << "/persistent/_" << file_name;
-	if (!reader.Open(sfilename.str().c_str()))
-	{
-		Log("Arquivo não pôde ser aberto");
-		return false;
-	}
-
-	mkvmuxer::MkvWriter final_writer;
-	sfilename << "/persistent/" << file_name;
-	if (!final_writer.Open(sfilename.str().c_str()))
-	{
-		LogError(-99, "Escrito não pôde ser aberto");
-		return false;
-	}
-
-	if (!pSegment->CopyAndMoveCuesBeforeClusters(&reader, &final_writer))
-	{
-		LogError(-99, "Erro ao criar o arquivo com as cues organizadas");
-		return false;
-	}
-
-	reader.Close();
-	final_writer.Close();
- * */

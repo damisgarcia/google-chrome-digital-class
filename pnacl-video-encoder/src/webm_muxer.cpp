@@ -2,7 +2,7 @@
  * WebmMuxer.cpp
  *
  *  Created on: 24 de nov de 2015
- *      Author: joaquim
+ *  Author: Joaquim neto@LME (www.github.com/joaquimmnetto)
  */
 
 #include "webm_muxer.h"

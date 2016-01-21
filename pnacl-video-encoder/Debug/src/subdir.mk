@@ -4,7 +4,6 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/audio_encoder.cpp \
 ../src/video_track.cpp \
 ../src/video_encoder.cpp \
 ../src/webm_muxer.cpp \
@@ -12,7 +11,6 @@ CPP_SRCS += \
 ../src/video_encoder_module.cpp 
 
 OBJS += \
-./src/audio_encoder.o \
 ./src/video_track.o \
 ./src/video_encoder.o \
 ./src/webm_muxer.o \
@@ -20,7 +18,6 @@ OBJS += \
 ./src/video_encoder_module.o 
 
 CPP_DEPS += \
-./src/audio_encoder.d \
 ./src/video_track.d \
 ./src/video_encoder.d \
 ./src/webm_muxer.d \

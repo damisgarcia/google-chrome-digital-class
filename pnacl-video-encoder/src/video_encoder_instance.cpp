@@ -1,7 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Modified by ...
+// Modified by Joaquim neto@LME (www.github.com/joaquimmnetto)
 
 #include "video_encoder_instance.h"
 #include <sys/mount.h>
@@ -11,7 +11,6 @@
 #include <ppapi/cpp/module.h>
 #include <ppapi/cpp/var.h>
 #include <ppapi/cpp/var_array_buffer.h>
-#include <ppapi/cpp/var_dictionary.h>
 #include <ppapi/utility/completion_callback_factory.h>
 
 #include <ppapi/c/pp_errors.h>
@@ -23,23 +22,6 @@
 
 #define FS_PATH "/persistent/"
 
-//-----------------------Workers para executar encoders em paralelo-------------------------------
-//Necessários pois a thread principal do Pepper(chrome) não permite bloqueios(como em leitura/escrita de arquivos, espera por recursos, etc).
-
-pp::Instance* _instance = 0;
-VideoEncoder* _video_enc = 0;
-
-pp::Size _video_size;
-PP_VideoProfile _video_profile;
-void VideoEncoderWorker(void* params, int result);
-
-pp::Resource _new_track_res;
-void ChangeTrackWorker(void* params, int result);
-
-WebmMuxer* _muxer = 0;
-void StopEncoderWorker(void* params, int result);
-
-//-----------------------------------------------------------------------------------------------------
 
 VideoEncoderInstance::VideoEncoderInstance(PP_Instance instance,
 		pp::Module* module) :
@@ -51,7 +33,6 @@ VideoEncoderInstance::VideoEncoderInstance(PP_Instance instance,
 						handle)
 {
 	InitializeFileSystem(FS_PATH);
-	__instance = this;
 }
 
 VideoEncoderInstance::~VideoEncoderInstance()
@@ -103,91 +84,20 @@ void VideoEncoderInstance::HandleMessage(const pp::Var& var_message)
 	std::string command = dict_message.Get("command").AsString();
 	Log("Comando recebido:" << command);
 
+	//
 	if (command == "start")
 	{
-		if (video_enc && video_enc->is_encoding())
-		{
-			Log("Encode já em execução, chame stop antes de iniciar novamente.");
-			return;
-		}
-		muxer = new WebmMuxer(*this);
-		video_enc = new VideoEncoder(this, *muxer);
-
-		pp::Size requested_size = pp::Size(dict_message.Get("width").AsInt(),
-				dict_message.Get("height").AsInt());
-
-		pp::Var var_video_track = dict_message.Get("video_track");
-
-		if (!var_video_track.is_resource())
-		{
-			LogError(-99, "Video_track não é um resource");
-			return;
-		}
-
-		file_name = dict_message.Get("file_name").AsString();
-
-		if (file_name.length() == 0)
-		{
-			LogError(-99, "Nome do arquivo não pode ser vazio");
-			return;
-		}
-
-		//Variáveis tem que serem passadas assim porque o callback da PPAPI não suporta tantos argumentos(máximo de 3).
-		_video_profile = PP_VIDEOPROFILE_VP8_ANY;
-		_video_size = requested_size;
-		_video_enc = video_enc;
-
-		Log("Argumentos:");
-		Log("Encoder: VP8");
-		Log("Video Size: (" << _video_size.width() << "," << _video_size.height() <<")");
-		Log("File name:" << file_name);
-
-		muxer->SetFileName(file_name);
-
-		video_enc->SetTrack(var_video_track.AsResource());
-
-		video_encoder_thread.Start();
-
-		pp::CompletionCallback video_callback(&VideoEncoderWorker, 0);
-		video_encoder_thread.message_loop().PostWork(video_callback, 0);
-
-		Log("Comando executado com sucesso");
+		StartEncoder(dict_message);
 	}
 
 	else if (command == "change_track")
 	{
-
-		_new_track_res = dict_message.Get("video_track").AsResource();
-		_video_enc = video_enc;
-
-		Log("Track modificada");
-
-		pp::CompletionCallback change_callback(&ChangeTrackWorker, 0);
-		video_encoder_thread.message_loop().PostWork(change_callback, 0);
+		ChangeTrack(dict_message);
 	}
 
 	else if (command == "stop")
 	{
-
-		if (!video_enc)
-		{
-			Log("Inicie um encode antes de tentar parar!");
-			return;
-		}
-		if (!video_enc->is_encoding())
-		{
-			Log("Encoder já parado");
-		}
-		else
-		{
-			Log("Parando encode...");
-			_instance = this;
-			_video_enc = video_enc;
-			_muxer = muxer;
-			pp::CompletionCallback stop_callback(&StopEncoderWorker, 0);
-			video_encoder_thread.message_loop().PostWork(stop_callback, 0);
-		}
-		Log("Comando executado com sucesso");
+		StopEncoder(dict_message);
 	}
 	else
 	{
@@ -195,6 +105,88 @@ void VideoEncoderInstance::HandleMessage(const pp::Var& var_message)
 	}
 
 }
+
+void VideoEncoderInstance::StartEncoder(pp::VarDictionary& message)
+{
+	if (video_enc && video_enc->is_encoding())
+	{
+		Log("Encode já em execução, chame stop antes de iniciar novamente.");
+		return;
+	}
+	muxer = new WebmMuxer(*this);
+	video_enc = new VideoEncoder(this, *muxer);
+
+	pp::Size requested_size = pp::Size(message.Get("width").AsInt(),
+			message.Get("height").AsInt());
+
+	pp::Var var_video_track = message.Get("video_track");
+
+	if (!var_video_track.is_resource())
+	{
+		LogError(-99, "Video_track não é um resource");
+		return;
+	}
+
+	std::string file_name = message.Get("file_name").AsString();
+
+	if (file_name.length() == 0)
+	{
+		LogError(-99, "Nome do arquivo não pode ser vazio");
+		return;
+	}
+
+	_video_profile = PP_VIDEOPROFILE_VP8_ANY;
+	_video_size = requested_size;
+	_video_enc = video_enc;
+
+	Log("Argumentos:");
+	Log("Encoder: VP8");
+	Log(
+			"Video Size: (" << _video_size.width() << "," << _video_size.height() <<")");
+	Log("File name:" << file_name);
+
+	muxer->SetFileName(file_name);
+
+	video_enc->SetTrack(var_video_track.AsResource());
+
+	video_encoder_thread.Start();
+
+	pp::CompletionCallback encoder_callback(&VideoEncoderWorker, 0);
+	video_encoder_thread.message_loop().PostWork(encoder_callback, 0);
+
+}
+void VideoEncoderInstance::ChangeTrack(pp::VarDictionary& message)
+{
+	_new_track_res = message.Get("video_track").AsResource();
+	_video_enc = video_enc;
+
+	Log("Track modificada");
+
+	pp::CompletionCallback change_callback(&ChangeTrackWorker, 0);
+	video_encoder_thread.message_loop().PostWork(change_callback, 0);
+}
+void VideoEncoderInstance::StopEncoder(pp::VarDictionary& message)
+{
+	if (!video_enc)
+	{
+		Log("Inicie um encode antes de tentar parar!");
+		return;
+	}
+	if (!video_enc->is_encoding())
+	{
+		Log("Encoder já parado");
+	}
+	else
+	{
+		Log("Parando encode...");
+		_instance = this;
+		_video_enc = video_enc;
+		_muxer = muxer;
+		pp::CompletionCallback stop_callback(&StopEncoderWorker, 0);
+		video_encoder_thread.message_loop().PostWork(stop_callback, 0);
+	}
+}
+
 //--------------------------Impl. dos Workers--------------------------------
 void ChangeTrackWorker(void* params, int result)
 {
@@ -203,7 +195,7 @@ void ChangeTrackWorker(void* params, int result)
 
 void VideoEncoderWorker(void* params, int result)
 {
-	_video_enc->Encode(_video_size,_video_profile);
+	_video_enc->Encode(_video_size, _video_profile);
 }
 
 void StopEncoderWorker(void* params, int result)

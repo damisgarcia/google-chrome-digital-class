@@ -2,7 +2,7 @@
  * videotrack.cpp
  *
  *  Created on: 10 de dez de 2015
- *      Author: joaquim
+ *  Author: Joaquim neto@LME (www.github.com/joaquimmnetto)
  */
 
 #include "video_track.h"

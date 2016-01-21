@@ -2,7 +2,7 @@
  * WebmMuxer.h
  *
  *  Created on: 24 de nov de 2015
- *      Author: joaquim
+ *  Author: Joaquim neto@LME (www.github.com/joaquimmnetto)
  */
 
 #ifndef WEBM_MUXER_H_
@@ -18,7 +18,10 @@
 
 #include "libwebm/mkvwriter.hpp"
 #include "tipos.h"
-
+/*
+ * Classe que usa a libwebm para compilar frames em formato VP8/VP9 em um arquivo .webm
+ *
+ */
 class WebmMuxer {
 public:
 

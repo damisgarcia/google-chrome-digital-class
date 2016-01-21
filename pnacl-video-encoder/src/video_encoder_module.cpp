@@ -2,7 +2,7 @@
  * videoencodermodule.cpp
  *
  *  Created on: 19 de nov de 2015
- *      Author: joaquim
+ *  Author: Joaquim neto@LME (www.github.com/joaquimmnetto)
  */
 
 #include "video_encoder_module.h"
@@ -19,6 +19,7 @@ pp::Instance* VideoEncoderModule::CreateInstance(PP_Instance instance) {
 
 namespace pp {
 
+//Ponto de entrada do NaCl.
 // Factory function for your specialization of the Module object.
 Module* CreateModule() {
 	return new VideoEncoderModule();

@@ -2,7 +2,7 @@
  * video_encoder_instance.h
  *
  *  Created on: 18 de nov de 2015
- *      Author: joaquim
+ *  Author: Joaquim neto@LME (www.github.com/joaquimmnetto)
  */
 
 #ifndef VIDEOENCODER_H_
@@ -37,7 +37,7 @@
  * Classe que codifica os frames recebidos do navegador. Têm três fluxos principais: Trilha de frames, Encoder, e BitstreamBuffer.
  *
  * A trilha de frames mostra os frames obtidos do navegador, que são utilizados pelo Encoder. Este quando termina seu serviço, envia
- * os frames para o BitstreamBuffer para serem devidamente tratados.
+ * os frames para o BitstreamBuffer para serem devidamente enviados ao muxer.
  *
  *
  * */
@@ -135,8 +135,6 @@ private:
 	 */
 	void StopTrackingFrames();
 
-	void EncodeWorker(int result);
-
 
 	/**Instância atual do pepper*/
 	pp::Instance* instance;
@@ -146,8 +144,6 @@ private:
 	WebmMuxer& muxer;
 	/**Objeto trilha atual*/
 	VideoTrack* track;
-	/**Objeto trilha para substituir o atual no próximo frame*/
-	VideoTrack* new_track;
 	/**Todas as trilhas atualmente rodando*/
 	std::map<int, VideoTrack*> tracks;
 	/**Tipo do encoder que será usado(Padrão VP8)*/
@@ -171,16 +167,13 @@ private:
 	bool receiving_frames;
 	/**Se o próximo key frame deve ser forçado. Necessário para fazer uma mudança de trilha sem perdas.*/
 	bool force_key_frame;
-	/**Timestamp indicando o tempo do último key frame lançado*/
-	PP_Time last_key_frame;
 	/**Timestamp indicando o tempo do último encode*/
 	PP_Time last_tick;
 	/**Timestamp do ultímo frame salvo com sucesso*/
 	uint64 last_ts;
-	uint64 frame_count;
 	/**Fila com as timestamps dos frames encodados. São retirados pelo BitstreamBuffer para serem passadas ao muxer.*/
 	std::deque<PP_TimeDelta> timestamps;
-
+	uint64 frame_count;
 };
 
 #endif /* VIDEO_ENCODER_INSTANCE_H_ */

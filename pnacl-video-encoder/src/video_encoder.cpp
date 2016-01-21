@@ -1,7 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Modified by Joaquim Neto ( https://github.com/Joaquimmnetto )
+// Modified by Joaquim neto@LME (www.github.com/joaquimmnetto)
 
 #include "video_encoder.h"
 #include "video_encoder_instance.h"
@@ -39,16 +39,16 @@
 #define NS_EXP 1000000000; //10^9
 
 #define FS_PATH "/persistent/"
+
 //2 keyframe/s.
 #define KEY_FRAME_RATIO 15
 
 static bool probed_encoder = false;
 
 VideoEncoder::VideoEncoder(pp::Instance* _instance, WebmMuxer& _muxer) :
-		instance(_instance), handle(instance), muxer(_muxer), track(NULL), new_track(
-				NULL), video_profile(PP_VIDEOPROFILE_VP8_ANY), frame_format(
+		instance(_instance), handle(instance), muxer(_muxer), track(NULL), video_profile(PP_VIDEOPROFILE_VP8_ANY), frame_format(
 				PP_VIDEOFRAME_FORMAT_I420), cb_factory(this), encoding(false), encode_ticking(
-				false), force_key_frame(false), last_key_frame(0), last_tick(0), last_ts(
+				false), force_key_frame(false),last_tick(0), last_ts(
 				0), frame_count(0)
 {
 
@@ -169,7 +169,7 @@ void VideoEncoder::ScheduleNextEncode()
 
 	PP_Time now = pp::Module::Get()->core()->GetTime();
 
-	//framerate hard-coded para 30fps
+	//framerate hard-coded para 30fps(frame rate máximo, caso não haja limitações de hardware)
 	PP_Time tick = 1.0 / 30.0;
 
 	PP_Time delta = tick
@@ -313,6 +313,7 @@ void VideoEncoder::OnGetBitstreamBuffer(int32 result, PP_BitstreamBuffer buffer)
 #ifdef LOG_FRAMES
 	Log("Salvando frame " << timestamp_ns << " de tamanho "<< size << key frame?" key frame" : "");
 #endif
+	//arquivos webm tem que ter timestamps que aumentem monotonicamente.
 	if (timestamp_ns >= last_ts)
 	{
 		last_ts = timestamp_ns;
