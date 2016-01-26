@@ -1,7 +1,7 @@
 'use strict'
 
 var Uploader = (function(){
-  var SERVER = "http://127.0.0.1:3000"
+  var SERVER = "http://www.digitalclass.lme.ufc.br:3000"
   var API = "/api/v1"
 
   var self = {}
