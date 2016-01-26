@@ -9,9 +9,9 @@
  */
 
 angular.module('digitalclassApp')
-  .factory('Profile', function ($http,$window,$rootScope) {
+  .factory('Profile', function ($http,$window,$rootScope,site) {
     var Profile = (function(){
-      var SERVER = "http://127.0.0.1" // for development
+      var SERVER = site.url // for development
       var API = "/api/v1"
 
       var self = {}

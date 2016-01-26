@@ -8,9 +8,9 @@
  * Factory in the digitalclassApp.
  */
 angular.module('digitalclassApp')
-  .factory('Auth', function ($rootScope,$http,$cookieStore,$cookies,Profile) {
+  .factory('Auth', function ($rootScope,$http,$cookieStore,$cookies,Profile,site) {
     var Auth = ( function(){
-      var SERVER = "http://127.0.0.1" // for development
+      var SERVER = site.url // for development
       var self = {}
 
       self.isAuthorized = function(){
