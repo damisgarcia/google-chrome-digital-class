@@ -1,0 +1,30 @@
+{
+  "name": "Digital Class",
+  "version": "0.6.2",
+  "minimum_chrome_version": "43.0.0.0",
+  "manifest_version": 2,
+  "description": "Video Encode Example",
+  "icons": {
+    "128": "icon128.png"
+  },
+  "browser_action":{
+    "default_popup": "index.html"
+  },
+  "background": {
+    "page":"background.html"
+  },
+  "web_accessible_resources":[
+    "index.html",
+    "app/",
+    "bower_components/",
+    "test/"
+  ],
+  "permissions": [
+    "desktopCapture",
+    "tabCapture",
+    "storage",
+    "unlimitedStorage",
+    "tabs",
+    "http://127.0.0.1:*/*"
+  ]
+}

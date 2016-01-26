@@ -1,0 +1,7 @@
+<h1 class="text-center">Edit File</h1>
+<form name="repositoryUpload" ng-submit="repository.update(repositoryUpload)" ng-init=" repository.filename = repositories.select_file.$name;">
+  <div class="form-group" ng-class="{'has-error':repositoryUpload.$invalid}">
+    <input type="text" ng-model="repository.filename" ng-pattern="repository.validator_folder_name" class="form-control">
+  </div>
+  <button type="submit" class="btn btn-large btn-danger btn-block" ng-disabled="repository.disabled"><big>Update</big></button>
+</form>
