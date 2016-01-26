@@ -25,6 +25,6 @@
     "storage",
     "unlimitedStorage",
     "tabs",
-    "http://127.0.0.1:*/*"
+    "http://www.digitalclass.lme.ufc.br:*"
   ]
 }
