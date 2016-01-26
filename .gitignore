@@ -1,0 +1,7 @@
+dist
+digitalclass
+
+bower_components
+
+.metadata
+node_modules

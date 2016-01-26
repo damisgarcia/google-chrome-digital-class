@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html ng-app="digitalclassApp">
+  <head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Multiple Tracks</title>
+    <script type="text/javascript" src="common.js"></script>
+    <script type="text/javascript" src="test-multi-track.js"></script>
+    <style>
+      .row{
+        display: flex;
+        flex-direction: row;
+        width: 920px;
+        margin:15px auto;
+      }
+      .col{
+        width:50%;
+        margin:15px 10px;
+      }
+      video{
+        background-color: #000;
+        border:5px red transparent;
+      }
+      video.active{
+        border:5px red solid;
+      }
+    </style>
+  </head>
+  <body data-width="1280" data-height="720" data-name="video_encode" data-tools="pnacl newlib glibc clang-newlib linux" data-configs="Debug Release" data-path="{tc}/{config}">
+    <div class="row">
+      <video id="mediaUser" class="col" width="640" height="480" autoplay="true" controls="true"></video>
+      <video id="mediaUserSmall" class="col" width="320" height="240" autoplay="true" controls="true"></video>
+    </div>
+    <button id="start">Start</button> <button id="stop">Stop!</button> <button id="switch">Switch Target</button>
+    <div id="listener"></div>
+    <!-- The NaCl plugin will be embedded inside the element with id "listener".
+        See common.js.-->
+  </body>
+</html>

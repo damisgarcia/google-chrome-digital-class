@@ -1,0 +1,8 @@
+<div class="container">
+  <h3>Camera</h3>
+  <div class="well">
+    <button class="btn btn-lg btn-block btn-primary" ng-click="webcam.start()" ng-disabled="busy">Iniciar Captura</button>
+    <button class="btn btn-lg btn-block" ng-click="webcam.stop()" ng-disabled="!busy">Finalizar Captura</button>
+  </div>
+  <video id="preview" width="100%" autoplay="true"></video>
+</div>

@@ -1,0 +1,29 @@
+{
+  "name": "digitalclass",
+  "authors": [
+    "damisgarcia <damisgarcia@gmail.com>",
+    "joaquim"
+  ],
+  "description": "Ferramenta interatica para a captura de conteúdos midiaticos.",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.8",
+    "angular-ui-router": "~0.2.15",
+    "angular-bootstrap": "~0.14.3",
+    "bootstrap": "~3.3.6",
+    "metro-bootstrap": "*",
+    "Materialize": "materialize#~0.97.3",
+    "ng-tags-input": "~3.0.0",
+    "flexboxgrid": "~6.3.0"
+  }
+}
