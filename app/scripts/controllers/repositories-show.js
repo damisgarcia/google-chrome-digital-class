@@ -63,13 +63,13 @@
 
           self.video.config = {
             sources: [],
-            theme: "bower_components/videogular-themes-default/videogular.css",
+            theme: "app/styles/videogular.css",
             processed: false
           }
 
           self.audio.config = {
             sources: [],
-            theme: "bower_components/videogular-themes-default/videogular.css"
+            theme: "app/styles/videogular.css"
           }
 
           angular.forEach(res.media_group,function(media){
